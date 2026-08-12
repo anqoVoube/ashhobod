@@ -229,22 +229,28 @@ button{ font:inherit; color:inherit; }
 .c4{ width:110px; height:32px; left:18%; top:44%;  opacity:.45 !important; animation:drift 40s linear infinite reverse; }
 @keyframes drift{ from{ transform:translateX(-6vw) } to{ transform:translateX(6vw) } }
 
-.hero-photo{
-  position:absolute; inset:auto 0 0 0; height:58%; z-index:-2;
-  background:var(--img-day) center 34%/cover no-repeat;
-  filter:saturate(1.5) contrast(1.05) brightness(1.04);
-  -webkit-mask-image:linear-gradient(to bottom, transparent, #000 46%, #000);
-          mask-image:linear-gradient(to bottom, transparent, #000 46%, #000);
-  opacity:.44;
+/* drawn park skyline — replaced the aerial photo, which was 576px wide at source
+   and visibly soft once stretched across the hero */
+.hero-park{
+  position:absolute; inset:auto 0 -1px 0; z-index:-2;
+  width:100%; height:auto; display:block; pointer-events:none;
+  opacity:.92;
 }
+/* the drawing is 2400 wide, so on a phone it renders ~100px tall and the rides
+   vanish — scale it up around the skyline instead, the hero clips the overflow */
+@media (max-width:760px){
+  .hero-park{ transform:scale(2.4); transform-origin:60% 100%; }
+}
+
 /* keeps the headline readable where it sits over the aerial photo */
 .hero::after{
   content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
-  background:linear-gradient(102deg, color-mix(in srgb, var(--sky-1) 90%, transparent) 0 26%, transparent 62%);
+  background:linear-gradient(100deg, var(--sky-1) 0 30%, color-mix(in srgb, var(--sky-1) 78%, transparent) 46%, transparent 68%);
 }
-:root[data-theme="dark"] .hero-photo{ opacity:.38; filter:saturate(1.3) brightness(.75); }
+/* the drawing is lit for daylight; at night knock it back so it reads as scenery */
+:root[data-theme="dark"] .hero-park{ opacity:.6; filter:saturate(.85) brightness(.7); }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .hero-photo{ opacity:.38; filter:saturate(1.3) brightness(.75); }
+  :root:not([data-theme="light"]) .hero-park{ opacity:.6; filter:saturate(.85) brightness(.7); }
 }
 
 .hero-grid{
@@ -279,9 +285,10 @@ button{ font:inherit; color:inherit; }
 .hero-cta{ display:flex; flex-wrap:wrap; gap:12px; margin-top:26px; }
 @media (max-width:900px){ .hero-cta{ justify-content:center; } }
 
+.statband{ background:var(--sky-1); padding-block:clamp(16px,2.6vw,30px); }
 .stats{
   display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:10px; margin-top:34px; padding-bottom:clamp(20px,4vw,44px);
+  gap:10px; margin:0; padding:0; list-style:none;
 }
 @media (max-width:560px){ .stats{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .stat{
@@ -294,7 +301,7 @@ button{ font:inherit; color:inherit; }
 .stat span{ font-size:.76rem; color:var(--ink-3); font-weight:700; }
 
 /* kart stage */
-.stage{ position:relative; min-height:clamp(240px,34vw,400px); display:grid; place-items:end center; }
+.stage{ position:relative; min-height:clamp(220px,30vw,360px); display:grid; place-items:end center; }
 .kart{ position:relative; z-index:2; width:min(100%,560px); filter:drop-shadow(0 26px 26px rgba(45,15,70,.28)); }
 .kart svg{ width:100%; height:auto; display:block; }
 .kart{ animation:rev 2.4s ease-in-out infinite; }
@@ -307,26 +314,6 @@ button{ font:inherit; color:inherit; }
 #kartSpeed path:nth-child(2),#kartSpeed path:nth-child(5){ animation-delay:-.33s }
 #kartSpeed path:nth-child(3),#kartSpeed path:nth-child(6){ animation-delay:-.66s }
 @keyframes whoosh{ 0%{opacity:0;transform:scaleX(.4)} 40%{opacity:.9} 100%{opacity:0;transform:scaleX(1.5)} }
-
-.track{
-  position:absolute; left:50%; bottom:-6px; width:min(1240px,180%); height:200px;
-  transform:translateX(-50%); z-index:1; pointer-events:none; overflow:hidden; opacity:.62;
-  -webkit-mask-image:radial-gradient(112% 108% at 50% 116%, #000 22%, rgba(0,0,0,.45) 52%, transparent 74%);
-          mask-image:radial-gradient(112% 108% at 50% 116%, #000 22%, rgba(0,0,0,.45) 52%, transparent 74%);
-}
-.track::before{
-  content:""; position:absolute; inset:0;
-  background:linear-gradient(to top, var(--track-1), var(--track-2));
-  clip-path:polygon(-10% 100%, 110% 100%, 57% 0%, 43% 0%);
-}
-/* track seams sliding toward the viewer — visible either side of the kart */
-.track::after{
-  content:""; position:absolute; inset:0;
-  background:repeating-linear-gradient(to bottom, rgba(255,255,255,.65) 0 3px, transparent 3px 27px);
-  clip-path:polygon(-10% 100%, 110% 100%, 57% 0%, 43% 0%);
-  animation:runway 1.15s linear infinite;
-}
-@keyframes runway{ from{ background-position:0 0 } to{ background-position:0 27px } }
 
 /* ---------------------------------------------------------- marquee */
 .marquee{
@@ -417,12 +404,6 @@ button{ font:inherit; color:inherit; }
 .kartzone .kicker{ color:var(--kart-amber); }
 .kartzone h2 em{ font-style:normal; color:var(--kart-red); }
 .kartzone .sec-head p{ color:var(--carbon-ink-2); }
-
-.kz-photo{
-  position:absolute; inset:0; z-index:-3; opacity:.16;
-  background:var(--img-pend) center/cover no-repeat;
-  filter:grayscale(.5) contrast(1.2);
-}
 
 .specs{ display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); margin-bottom:44px; }
 .spec{
@@ -856,7 +837,7 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
 <div class="view" id="view-home">
 
   <section class="hero">
-    <div class="hero-photo" aria-hidden="true"></div>
+    {{SVG:park.svg}}
     <div class="hero-clouds" aria-hidden="true">
       <i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>
     </div>
@@ -873,13 +854,15 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
       </div>
 
       <div class="stage">
-        <div class="track" aria-hidden="true"></div>
         <div class="kart" role="img" data-i18n-aria="hero.kartAlt">{{SVG:kart.svg}}</div>
       </div>
     </div>
 
+  </section>
+
+  <section class="statband">
     <div class="wrap">
-      <ul class="stats" style="list-style:none;padding-left:0;margin-left:0;margin-right:0">
+      <ul class="stats">
         <li class="stat"><b>34</b><span data-i18n="stat.rides"></span></li>
         <li class="stat"><b>650 m</b><span data-i18n="stat.track"></span></li>
         <li class="stat"><b>75</b><span data-i18n="stat.speed"></span></li>
@@ -905,7 +888,6 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
 
   <!-- ─────────── karting (dark) ─────────── -->
   <section class="sec kartzone" id="karting">
-    <div class="kz-photo" aria-hidden="true"></div>
     <div class="wrap">
       <div class="sec-head rv">
         <span class="kicker">GOKART RACING</span>

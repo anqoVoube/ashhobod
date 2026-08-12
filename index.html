@@ -229,22 +229,28 @@ button{ font:inherit; color:inherit; }
 .c4{ width:110px; height:32px; left:18%; top:44%;  opacity:.45 !important; animation:drift 40s linear infinite reverse; }
 @keyframes drift{ from{ transform:translateX(-6vw) } to{ transform:translateX(6vw) } }
 
-.hero-photo{
-  position:absolute; inset:auto 0 0 0; height:58%; z-index:-2;
-  background:var(--img-day) center 34%/cover no-repeat;
-  filter:saturate(1.5) contrast(1.05) brightness(1.04);
-  -webkit-mask-image:linear-gradient(to bottom, transparent, #000 46%, #000);
-          mask-image:linear-gradient(to bottom, transparent, #000 46%, #000);
-  opacity:.44;
+/* drawn park skyline — replaced the aerial photo, which was 576px wide at source
+   and visibly soft once stretched across the hero */
+.hero-park{
+  position:absolute; inset:auto 0 -1px 0; z-index:-2;
+  width:100%; height:auto; display:block; pointer-events:none;
+  opacity:.92;
 }
+/* the drawing is 2400 wide, so on a phone it renders ~100px tall and the rides
+   vanish — scale it up around the skyline instead, the hero clips the overflow */
+@media (max-width:760px){
+  .hero-park{ transform:scale(2.4); transform-origin:60% 100%; }
+}
+
 /* keeps the headline readable where it sits over the aerial photo */
 .hero::after{
   content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
-  background:linear-gradient(102deg, color-mix(in srgb, var(--sky-1) 90%, transparent) 0 26%, transparent 62%);
+  background:linear-gradient(100deg, var(--sky-1) 0 30%, color-mix(in srgb, var(--sky-1) 78%, transparent) 46%, transparent 68%);
 }
-:root[data-theme="dark"] .hero-photo{ opacity:.38; filter:saturate(1.3) brightness(.75); }
+/* the drawing is lit for daylight; at night knock it back so it reads as scenery */
+:root[data-theme="dark"] .hero-park{ opacity:.6; filter:saturate(.85) brightness(.7); }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .hero-photo{ opacity:.38; filter:saturate(1.3) brightness(.75); }
+  :root:not([data-theme="light"]) .hero-park{ opacity:.6; filter:saturate(.85) brightness(.7); }
 }
 
 .hero-grid{
@@ -279,9 +285,10 @@ button{ font:inherit; color:inherit; }
 .hero-cta{ display:flex; flex-wrap:wrap; gap:12px; margin-top:26px; }
 @media (max-width:900px){ .hero-cta{ justify-content:center; } }
 
+.statband{ background:var(--sky-1); padding-block:clamp(16px,2.6vw,30px); }
 .stats{
   display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:10px; margin-top:34px; padding-bottom:clamp(20px,4vw,44px);
+  gap:10px; margin:0; padding:0; list-style:none;
 }
 @media (max-width:560px){ .stats{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .stat{
@@ -294,7 +301,7 @@ button{ font:inherit; color:inherit; }
 .stat span{ font-size:.76rem; color:var(--ink-3); font-weight:700; }
 
 /* kart stage */
-.stage{ position:relative; min-height:clamp(240px,34vw,400px); display:grid; place-items:end center; }
+.stage{ position:relative; min-height:clamp(220px,30vw,360px); display:grid; place-items:end center; }
 .kart{ position:relative; z-index:2; width:min(100%,560px); filter:drop-shadow(0 26px 26px rgba(45,15,70,.28)); }
 .kart svg{ width:100%; height:auto; display:block; }
 .kart{ animation:rev 2.4s ease-in-out infinite; }
@@ -307,26 +314,6 @@ button{ font:inherit; color:inherit; }
 #kartSpeed path:nth-child(2),#kartSpeed path:nth-child(5){ animation-delay:-.33s }
 #kartSpeed path:nth-child(3),#kartSpeed path:nth-child(6){ animation-delay:-.66s }
 @keyframes whoosh{ 0%{opacity:0;transform:scaleX(.4)} 40%{opacity:.9} 100%{opacity:0;transform:scaleX(1.5)} }
-
-.track{
-  position:absolute; left:50%; bottom:-6px; width:min(1240px,180%); height:200px;
-  transform:translateX(-50%); z-index:1; pointer-events:none; overflow:hidden; opacity:.62;
-  -webkit-mask-image:radial-gradient(112% 108% at 50% 116%, #000 22%, rgba(0,0,0,.45) 52%, transparent 74%);
-          mask-image:radial-gradient(112% 108% at 50% 116%, #000 22%, rgba(0,0,0,.45) 52%, transparent 74%);
-}
-.track::before{
-  content:""; position:absolute; inset:0;
-  background:linear-gradient(to top, var(--track-1), var(--track-2));
-  clip-path:polygon(-10% 100%, 110% 100%, 57% 0%, 43% 0%);
-}
-/* track seams sliding toward the viewer — visible either side of the kart */
-.track::after{
-  content:""; position:absolute; inset:0;
-  background:repeating-linear-gradient(to bottom, rgba(255,255,255,.65) 0 3px, transparent 3px 27px);
-  clip-path:polygon(-10% 100%, 110% 100%, 57% 0%, 43% 0%);
-  animation:runway 1.15s linear infinite;
-}
-@keyframes runway{ from{ background-position:0 0 } to{ background-position:0 27px } }
 
 /* ---------------------------------------------------------- marquee */
 .marquee{
@@ -417,12 +404,6 @@ button{ font:inherit; color:inherit; }
 .kartzone .kicker{ color:var(--kart-amber); }
 .kartzone h2 em{ font-style:normal; color:var(--kart-red); }
 .kartzone .sec-head p{ color:var(--carbon-ink-2); }
-
-.kz-photo{
-  position:absolute; inset:0; z-index:-3; opacity:.16;
-  background:var(--img-pend) center/cover no-repeat;
-  filter:grayscale(.5) contrast(1.2);
-}
 
 .specs{ display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); margin-bottom:44px; }
 .spec{
@@ -856,7 +837,25 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
 <div class="view" id="view-home">
 
   <section class="hero">
-    <div class="hero-photo" aria-hidden="true"></div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 560" preserveAspectRatio="xMidYMax meet" class="hero-park" aria-hidden="true">
+<defs><linearGradient id="pGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd6a4"/><stop offset="1" stop-color="#4fb884"/></linearGradient><linearGradient id="pRoad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#867f9b"/><stop offset="1" stop-color="#4b4759"/></linearGradient></defs>
+<g opacity=".8"><rect x="75.7" y="278.4" width="8.7" height="53.9" rx="3.7" fill="#8a5a3c"/><path d="M45.3 282.1 q-5.6 -21.1 14.9 -27.3 q3.7 -23.6 19.8 -23.6 q21.1 0 20.5 24.8 q19.2 7.4 14.3 26.0 z" fill="#57c48d"/><path d="M45.3 282.1 q34.7 9.9 69.4 -1.2" fill="none" stroke="#3da675" stroke-width="4.3" opacity=".55"/><rect x="296.1" y="284.0" width="7.7" height="48.7" rx="3.3" fill="#8a5a3c"/><path d="M269.2 287.3 q-5.0 -18.7 13.2 -24.2 q3.3 -20.9 17.6 -20.9 q18.7 0 18.2 22.0 q17.1 6.6 12.7 23.1 z" fill="#57c48d"/><path d="M269.2 287.3 q30.8 8.8 61.6 -1.1" fill="none" stroke="#3da675" stroke-width="3.9" opacity=".55"/><rect x="555.8" y="280.0" width="8.4" height="52.4" rx="3.6" fill="#8a5a3c"/><path d="M526.4 283.6 q-5.4 -20.4 14.4 -26.4 q3.6 -22.8 19.2 -22.8 q20.4 0 19.8 24.0 q18.6 7.2 13.8 25.2 z" fill="#57c48d"/><path d="M526.4 283.6 q33.6 9.6 67.2 -1.2" fill="none" stroke="#3da675" stroke-width="4.2" opacity=".55"/><rect x="816.4" y="286.4" width="7.3" height="46.5" rx="3.1" fill="#8a5a3c"/><path d="M790.9 289.5 q-4.7 -17.7 12.5 -22.9 q3.1 -19.8 16.6 -19.8 q17.7 0 17.2 20.8 q16.1 6.2 12.0 21.8 z" fill="#57c48d"/><path d="M790.9 289.5 q29.1 8.3 58.2 -1.0" fill="none" stroke="#3da675" stroke-width="3.6" opacity=".55"/><rect x="1045.9" y="281.6" width="8.1" height="50.9" rx="3.5" fill="#8a5a3c"/><path d="M1017.5 285.1 q-5.2 -19.7 13.9 -25.5 q3.5 -22.0 18.6 -22.0 q19.7 0 19.1 23.2 q18.0 7.0 13.3 24.4 z" fill="#57c48d"/><path d="M1017.5 285.1 q32.5 9.3 65.0 -1.2" fill="none" stroke="#3da675" stroke-width="4.1" opacity=".55"/><rect x="1176.8" y="291.2" width="6.4" height="42.0" rx="2.8" fill="#8a5a3c"/><path d="M1154.2 294.0 q-4.1 -15.6 11.0 -20.2 q2.8 -17.5 14.7 -17.5 q15.6 0 15.2 18.4 q14.3 5.5 10.6 19.3 z" fill="#57c48d"/><path d="M1154.2 294.0 q25.8 7.4 51.5 -0.9" fill="none" stroke="#3da675" stroke-width="3.2" opacity=".55"/><rect x="1555.8" y="280.0" width="8.4" height="52.4" rx="3.6" fill="#8a5a3c"/><path d="M1526.4 283.6 q-5.4 -20.4 14.4 -26.4 q3.6 -22.8 19.2 -22.8 q20.4 0 19.8 24.0 q18.6 7.2 13.8 25.2 z" fill="#57c48d"/><path d="M1526.4 283.6 q33.6 9.6 67.2 -1.2" fill="none" stroke="#3da675" stroke-width="4.2" opacity=".55"/><rect x="1896.5" y="288.0" width="7.0" height="45.0" rx="3.0" fill="#8a5a3c"/><path d="M1872.0 291.0 q-4.5 -17.0 12.0 -22.0 q3.0 -19.0 16.0 -19.0 q17.0 0 16.5 20.0 q15.5 6.0 11.5 21.0 z" fill="#57c48d"/><path d="M1872.0 291.0 q28.0 8.0 56.0 -1.0" fill="none" stroke="#3da675" stroke-width="3.5" opacity=".55"/><rect x="2166.2" y="284.0" width="7.7" height="48.7" rx="3.3" fill="#8a5a3c"/><path d="M2139.2 287.3 q-5.0 -18.7 13.2 -24.2 q3.3 -20.9 17.6 -20.9 q18.7 0 18.2 22.0 q17.1 6.6 12.7 23.1 z" fill="#57c48d"/><path d="M2139.2 287.3 q30.8 8.8 61.6 -1.1" fill="none" stroke="#3da675" stroke-width="3.9" opacity=".55"/><rect x="2375.7" y="278.4" width="8.7" height="53.9" rx="3.7" fill="#8a5a3c"/><path d="M2345.3 282.1 q-5.6 -21.1 14.9 -27.3 q3.7 -23.6 19.8 -23.6 q21.1 0 20.5 24.8 q19.2 7.4 14.3 26.0 z" fill="#57c48d"/><path d="M2345.3 282.1 q34.7 9.9 69.4 -1.2" fill="none" stroke="#3da675" stroke-width="4.3" opacity=".55"/></g>
+<g stroke="#3a2a52" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"><path d="M1324 150 L1242 322 h30 L1330 158 L1388 322 h30 L1336 150 z" fill="#0b8a94"/><rect x="1226" y="308" rx="13" fill="#6d2e91"/><line x1="1330" y1="150" x2="1442.0" y2="150.0" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1433.5" y2="192.9" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1409.2" y2="229.2" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1372.9" y2="253.5" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1330.0" y2="262.0" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1287.1" y2="253.5" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1250.8" y2="229.2" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1226.5" y2="192.9" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1218.0" y2="150.0" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1226.5" y2="107.1" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1250.8" y2="70.8" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1287.1" y2="46.5" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1330.0" y2="38.0" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1372.9" y2="46.5" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1409.2" y2="70.8" stroke="#fff6fb" stroke-width="5"/><line x1="1330" y1="150" x2="1433.5" y2="107.1" stroke="#fff6fb" stroke-width="5"/><circle cx="1330" cy="150" r="112" fill="none" stroke="#12aebb" stroke-width="11"/><circle cx="1330" cy="150" r="90" fill="none" stroke="#12aebb" stroke-width="7"/><rect x="1315.0" y="31.0" width="30" height="26" rx="11" fill="#ff4f9d"/><rect x="1371.0" y="46.0" width="30" height="26" rx="11" fill="#f8a824"/><rect x="1412.0" y="87.0" width="30" height="26" rx="11" fill="#c53fb4"/><rect x="1427.0" y="143.0" width="30" height="26" rx="11" fill="#fff6fb"/><rect x="1412.0" y="199.0" width="30" height="26" rx="11" fill="#ff4f9d"/><rect x="1371.0" y="240.0" width="30" height="26" rx="11" fill="#f8a824"/><rect x="1315.0" y="255.0" width="30" height="26" rx="11" fill="#c53fb4"/><rect x="1259.0" y="240.0" width="30" height="26" rx="11" fill="#fff6fb"/><rect x="1218.0" y="199.0" width="30" height="26" rx="11" fill="#ff4f9d"/><rect x="1203.0" y="143.0" width="30" height="26" rx="11" fill="#f8a824"/><rect x="1218.0" y="87.0" width="30" height="26" rx="11" fill="#c53fb4"/><rect x="1259.0" y="46.0" width="30" height="26" rx="11" fill="#fff6fb"/><circle cx="1330" cy="150" r="20" fill="#f8a824"/><path d="M1700 132 L1612.0 200.0 L1629.6 200.0 z" fill="#c53fb4"/><path d="M1700 132 L1629.6 200.0 L1647.2 200.0 z" fill="#fff6fb"/><path d="M1700 132 L1647.2 200.0 L1664.8 200.0 z" fill="#c53fb4"/><path d="M1700 132 L1664.8 200.0 L1682.4 200.0 z" fill="#fff6fb"/><path d="M1700 132 L1682.4 200.0 L1700.0 200.0 z" fill="#c53fb4"/><path d="M1700 132 L1700.0 200.0 L1717.6 200.0 z" fill="#fff6fb"/><path d="M1700 132 L1717.6 200.0 L1735.2 200.0 z" fill="#c53fb4"/><path d="M1700 132 L1735.2 200.0 L1752.8 200.0 z" fill="#fff6fb"/><path d="M1700 132 L1752.8 200.0 L1770.4 200.0 z" fill="#c53fb4"/><path d="M1700 132 L1770.4 200.0 L1788.0 200.0 z" fill="#fff6fb"/><path d="M1700 132 L1612 200 q88 26 176 0 z" fill="none" stroke="#3a2a52" stroke-width="7" stroke-linejoin="round"/><path d="M1612 200 q88 26 176 0 l0 16 q-88 26 -176 0 z" fill="#f8a824"/><rect x="1633" y="218" width="10" height="94" rx="5" fill="#e08a0c"/><circle cx="1638" cy="260" r="17" fill="#12aebb" stroke="#3a2a52" stroke-width="6"/><rect x="1695" y="218" width="10" height="94" rx="5" fill="#e08a0c"/><circle cx="1700" cy="260" r="17" fill="#12aebb" stroke="#3a2a52" stroke-width="6"/><rect x="1757" y="218" width="10" height="94" rx="5" fill="#e08a0c"/><circle cx="1762" cy="260" r="17" fill="#12aebb" stroke="#3a2a52" stroke-width="6"/><rect x="1604" y="300" width="192" height="26" rx="13" fill="#6d2e91"/><rect x="1696" y="86" width="8" height="50" fill="#3a2a52"/><path d="M1704 88 l40 13 -40 13 z" fill="#ff4f9d" stroke="#3a2a52" stroke-width="5"/><rect x="1999" y="116" width="22" height="206" rx="9" fill="#0b8a94"/><path d="M1999 140 l22 22 M2021 140 l-22 22" stroke="#fff6fb" stroke-width="4" fill="none" opacity=".7"/><path d="M1999 174 l22 22 M2021 174 l-22 22" stroke="#fff6fb" stroke-width="4" fill="none" opacity=".7"/><path d="M1999 208 l22 22 M2021 208 l-22 22" stroke="#fff6fb" stroke-width="4" fill="none" opacity=".7"/><path d="M1999 242 l22 22 M2021 242 l-22 22" stroke="#fff6fb" stroke-width="4" fill="none" opacity=".7"/><path d="M1999 276 l22 22 M2021 276 l-22 22" stroke="#fff6fb" stroke-width="4" fill="none" opacity=".7"/><path d="M2010 180 L1936 198" stroke="#0b8a94" stroke-width="16" stroke-linecap="round"/><path d="M2010 180 L1936 198" stroke="#3a2a52" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M1936 184 c22 0 30 22 30 42 0 18 -14 30 -30 30 s-30 -12 -30 -30 c0 -20 8 -42 30 -42 z" fill="#ff4f9d"/><circle cx="1936" cy="224" r="10" fill="#fff6fb"/><path d="M2010 180 L2084 198" stroke="#0b8a94" stroke-width="16" stroke-linecap="round"/><path d="M2010 180 L2084 198" stroke="#3a2a52" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M2084 184 c22 0 30 22 30 42 0 18 -14 30 -30 30 s-30 -12 -30 -30 c0 -20 8 -42 30 -42 z" fill="#ff4f9d"/><circle cx="2084" cy="224" r="10" fill="#fff6fb"/><path d="M2010 58 c22 22 30 46 30 66 h-60 c0 -20 8 -44 30 -66 z" fill="#f8a824"/><path d="M1980 124 l-19 24 19 0 z M2040 124 l19 24 -19 0 z" fill="#c53fb4"/><circle cx="2010" cy="98" r="11" fill="#12aebb"/><rect x="1952" y="306" width="116" height="28" rx="14" fill="#6d2e91"/><rect x="2280" y="124" width="20" height="188" rx="8" fill="#9c2d90"/><path d="M2290 74 l86 50 h-172 z" fill="#12aebb"/><path d="M2204 124 h172 l0 14 h-172 z" fill="#f8a824"/><line x1="2290" y1="130" x2="2218" y2="184" stroke="#3a2a52" stroke-width="4"/><rect x="2207" y="184" width="22" height="16" rx="7" fill="#ff4f9d" stroke="#3a2a52" stroke-width="5"/><line x1="2290" y1="130" x2="2254" y2="194" stroke="#3a2a52" stroke-width="4"/><rect x="2243" y="194" width="22" height="16" rx="7" fill="#ff4f9d" stroke="#3a2a52" stroke-width="5"/><line x1="2290" y1="130" x2="2290" y2="184" stroke="#3a2a52" stroke-width="4"/><rect x="2279" y="184" width="22" height="16" rx="7" fill="#ff4f9d" stroke="#3a2a52" stroke-width="5"/><line x1="2290" y1="130" x2="2326" y2="194" stroke="#3a2a52" stroke-width="4"/><rect x="2315" y="194" width="22" height="16" rx="7" fill="#ff4f9d" stroke="#3a2a52" stroke-width="5"/><line x1="2290" y1="130" x2="2362" y2="184" stroke="#3a2a52" stroke-width="4"/><rect x="2351" y="184" width="22" height="16" rx="7" fill="#ff4f9d" stroke="#3a2a52" stroke-width="5"/><rect x="2242" y="308" width="96" height="26" rx="13" fill="#6d2e91"/></g>
+<g stroke="#3a2a52" stroke-width="7" stroke-linejoin="round"><rect x="414.4" y="278.0" width="11.2" height="67.2" rx="4.8" fill="#8a5a3c"/><path d="M375.2 282.8 q-7.2 -27.2 19.2 -35.2 q4.8 -30.4 25.6 -30.4 q27.2 0 26.4 32.0 q24.8 9.6 18.4 33.6 z" fill="#57c48d"/><path d="M375.2 282.8 q44.8 12.8 89.6 -1.6" fill="none" stroke="#3da675" stroke-width="5.6" opacity=".55"/><rect x="895.0" y="284.4" width="10.1" height="61.3" rx="4.3" fill="#8a5a3c"/><path d="M859.7 288.7 q-6.5 -24.5 17.3 -31.7 q4.3 -27.4 23.0 -27.4 q24.5 0 23.8 28.8 q22.3 8.6 16.6 30.2 z" fill="#57c48d"/><path d="M859.7 288.7 q40.3 11.5 80.6 -1.4" fill="none" stroke="#3da675" stroke-width="5.0" opacity=".55"/><rect x="1515.2" y="287.6" width="9.5" height="58.3" rx="4.1" fill="#8a5a3c"/><path d="M1481.9 291.7 q-6.1 -23.1 16.3 -29.9 q4.1 -25.8 21.8 -25.8 q23.1 0 22.4 27.2 q21.1 8.2 15.6 28.6 z" fill="#57c48d"/><path d="M1481.9 291.7 q38.1 10.9 76.2 -1.4" fill="none" stroke="#3da675" stroke-width="4.8" opacity=".55"/><rect x="2115.1" y="286.0" width="9.8" height="59.8" rx="4.2" fill="#8a5a3c"/><path d="M2080.8 290.2 q-6.3 -23.8 16.8 -30.8 q4.2 -26.6 22.4 -26.6 q23.8 0 23.1 28.0 q21.7 8.4 16.1 29.4 z" fill="#57c48d"/><path d="M2080.8 290.2 q39.2 11.2 78.4 -1.4" fill="none" stroke="#3da675" stroke-width="4.9" opacity=".55"/></g>
+<path d="M0 334 q600 -22 1200 -4 t1200 -6 V560 H0 z" fill="url(#pGround)"/>
+<path d="M-40 560 L2440 560 L1776 360 L624 360 z" fill="url(#pRoad)"/>
+<path d="M-40 560 L2440 560 L1776 360 L624 360 z" fill="none" stroke="#3a2a52" stroke-width="6" opacity=".45"/>
+<path d="M-40 560 L624 360" stroke="#fff6fb" stroke-width="9" opacity=".6"/>
+<path d="M2440 560 L1776 360" stroke="#fff6fb" stroke-width="9" opacity=".6"/>
+<path d="M1196.7 366.0 L1203.3 366.0" stroke="#fff6fb" stroke-width="4.2" opacity=".75" stroke-linecap="round"/>
+<path d="M1195.9 381.9 L1204.1 381.9" stroke="#fff6fb" stroke-width="4.9" opacity=".75" stroke-linecap="round"/>
+<path d="M1195.0 400.2 L1205.0 400.2" stroke="#fff6fb" stroke-width="5.6" opacity=".75" stroke-linecap="round"/>
+<path d="M1193.9 421.2 L1206.1 421.2" stroke="#fff6fb" stroke-width="6.4" opacity=".75" stroke-linecap="round"/>
+<path d="M1192.7 445.4 L1207.3 445.4" stroke="#fff6fb" stroke-width="7.4" opacity=".75" stroke-linecap="round"/>
+<path d="M1191.3 473.2 L1208.7 473.2" stroke="#fff6fb" stroke-width="8.5" opacity=".75" stroke-linecap="round"/>
+<path d="M1189.7 505.2 L1210.3 505.2" stroke="#fff6fb" stroke-width="9.8" opacity=".75" stroke-linecap="round"/>
+<path d="M1187.9 542.0 L1212.1 542.0" stroke="#fff6fb" stroke-width="11.3" opacity=".75" stroke-linecap="round"/>
+</svg>
     <div class="hero-clouds" aria-hidden="true">
       <i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>
     </div>
@@ -873,124 +872,94 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
       </div>
 
       <div class="stage">
-        <div class="track" aria-hidden="true"></div>
         <div class="kart" role="img" data-i18n-aria="hero.kartAlt"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470">
-  <defs>
-    <linearGradient id="kBody" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#48dee9"/>
-      <stop offset=".5" stop-color="#12aebb"/>
-      <stop offset="1" stop-color="#0a8b96"/>
-    </linearGradient>
-    <linearGradient id="kPod" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#e469d4"/>
-      <stop offset="1" stop-color="#a52d99"/>
-    </linearGradient>
-    <linearGradient id="kNose" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffd27a"/>
-      <stop offset="1" stop-color="#ef8b0e"/>
-    </linearGradient>
-    <radialGradient id="kTyre" cx=".36" cy=".28" r=".9">
-      <stop offset="0" stop-color="#525667"/>
-      <stop offset="1" stop-color="#15181f"/>
-    </radialGradient>
-    <radialGradient id="gShadow" cx=".5" cy=".5" r=".5">
-      <stop offset="0" stop-color="#2b1b3d" stop-opacity=".4"/>
-      <stop offset="1" stop-color="#2b1b3d" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="kVisor" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#38456b"/>
-      <stop offset="1" stop-color="#0c1020"/>
-    </linearGradient>
-  </defs>
-
-  <!-- ground shadow -->
-  <ellipse cx="400" cy="418" rx="300" ry="40" fill="url(#gShadow)"/>
-
-  <g stroke="#2b1b3d" stroke-width="9" stroke-linejoin="round" stroke-linecap="round">
-
-    <!-- ================= rear plane ================= -->
-    <!-- rear wing -->
-    <rect x="246" y="140" width="308" height="30" rx="15" fill="#c53fb4"/>
-    <rect x="268" y="168" width="16" height="30" rx="8" fill="#7d3a9e"/>
-    <rect x="516" y="168" width="16" height="30" rx="8" fill="#7d3a9e"/>
-    <rect x="330" y="166" width="18" height="64" rx="9" fill="#7d3a9e"/>
-    <rect x="452" y="166" width="18" height="64" rx="9" fill="#7d3a9e"/>
-
-    <!-- rear tyres (wider track, further away) -->
-    <g>
-      <ellipse cx="148" cy="278" rx="52" ry="60" fill="url(#kTyre)"/>
-      <ellipse cx="652" cy="278" rx="52" ry="60" fill="url(#kTyre)"/>
-      <ellipse cx="148" cy="278" rx="21" ry="25" fill="#ffc95e"/>
-      <ellipse cx="652" cy="278" rx="21" ry="25" fill="#ffc95e"/>
-    </g>
-    <!-- rear axle bar -->
-    <rect x="176" y="262" width="448" height="22" rx="11" fill="#4a3a63"/>
-
-    <!-- ================= driver ================= -->
-    <!-- torso / racing suit -->
-    <path d="M400 190 c-52 0 -84 14 -98 36 l-18 44 q116 26 232 0 l-18 -44 c-14 -22 -46 -36 -98 -36 z" fill="#ff4f9d"/>
-    <path d="M300 232 q100 22 200 0 l7 18 q-107 24 -214 0 z" fill="#e02e7f" stroke-width="7"/>
-    <!-- helmet -->
-    <path d="M400 106 c-48 0 -82 34 -82 78 0 20 8 34 20 42 h124 c12 -8 20 -22 20 -42 0 -44 -34 -78 -82 -78 z" fill="#f7f4ff"/>
-    <path d="M400 106 c-32 0 -58 16 -71 40 h142 c-13 -24 -39 -40 -71 -40 z" fill="#12aebb"/>
-    <path d="M336 184 q-6 -18 0 -32 22 -10 128 0 6 14 0 32 q-64 12 -128 0 z" fill="url(#kVisor)"/>
-    <path d="M348 160 q40 -8 84 -2" stroke="#7f93c8" stroke-width="7" fill="none" opacity=".85"/>
-
-    <!-- ================= side pods ================= -->
-    <path d="M232 340 q-22 -66 26 -80 l84 -14 8 100 -88 14 q-24 4 -30 -20 z" fill="url(#kPod)"/>
-    <path d="M568 340 q22 -66 -26 -80 l-84 -14 -8 100 88 14 q24 4 30 -20 z" fill="url(#kPod)"/>
-
-    <!-- ================= chassis ================= -->
-    <path d="M338 240 h124 q28 0 33 28 l18 84 q5 30 -29 30 h-168 q-34 0 -29 -30 l18 -84 q5 -28 33 -28 z" fill="url(#kBody)"/>
-    <path d="M352 258 h96" stroke="#bff4f8" stroke-width="10" opacity=".55" fill="none"/>
-
-    <!-- steering wheel + gloves -->
-    <path d="M340 268 h120 q12 0 12 12 v8 q0 12 -12 12 h-24 q-10 0 -10 -8 h-52 q0 8 -10 8 h-24 q-12 0 -12 -12 v-8 q0 -12 12 -12 z" fill="#241a35" stroke-width="7"/>
-    <rect x="316" y="262" width="42" height="34" rx="14" fill="#f7f4ff" stroke-width="7"/>
-    <rect x="442" y="262" width="42" height="34" rx="14" fill="#f7f4ff" stroke-width="7"/>
-
-    <!-- ================= nose cone (closest) ================= -->
-    <path d="M330 306 h140 q26 0 30 24 l12 56 q5 28 -28 28 h-168 q-33 0 -28 -28 l12 -56 q4 -24 30 -24 z" fill="url(#kNose)"/>
-    <path d="M344 328 l-8 44" stroke="#fff3d4" stroke-width="9" opacity=".6" fill="none"/>
-    <path d="M456 328 l8 44" stroke="#fff3d4" stroke-width="9" opacity=".6" fill="none"/>
-    <rect x="346" y="330" width="108" height="54" rx="16" fill="#ffffff"/>
-    <text x="400" y="373" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="900"
-          text-anchor="middle" fill="#c53fb4" stroke="none">01</text>
-
-    <!-- ================= front tyres ================= -->
-    <ellipse cx="212" cy="336" rx="64" ry="74" fill="url(#kTyre)"/>
-    <ellipse cx="588" cy="336" rx="64" ry="74" fill="url(#kTyre)"/>
-    <ellipse cx="212" cy="336" rx="28" ry="32" fill="#12aebb"/>
-    <ellipse cx="588" cy="336" rx="28" ry="32" fill="#12aebb"/>
-    <ellipse cx="212" cy="336" rx="9" ry="11" fill="#ffffff" stroke-width="6"/>
-    <ellipse cx="588" cy="336" rx="9" ry="11" fill="#ffffff" stroke-width="6"/>
-
-    <!-- front bumper -->
-    <rect x="284" y="390" width="232" height="30" rx="15" fill="#ff4f9d"/>
-  </g>
-
-  <!-- speed streaks (animated in CSS) -->
-  <g id="kartSpeed" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity=".85">
-    <path d="M56 214 h74"/>
-    <path d="M18 262 h48"/>
-    <path d="M40 316 h58"/>
-    <path d="M744 214 h-74"/>
-    <path d="M782 262 h-48"/>
-    <path d="M760 316 h-58"/>
-  </g>
-
-  <!-- logo sparkles -->
-  <g stroke="#2b1b3d" stroke-width="6" stroke-linejoin="round">
-    <path d="M96 128 l13 32 32 13 -32 13 -13 32 -13 -32 -32 -13 32 -13 z" fill="#ffc95e"/>
-    <path d="M706 168 l11 27 27 11 -27 11 -11 27 -11 -27 -27 -11 27 -11 z" fill="#12aebb"/>
-    <path d="M646 92 l9 22 22 9 -22 9 -9 22 -9 -22 -22 -9 22 -9 z" fill="#c53fb4"/>
-  </g>
+<defs>
+<linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#3d4661"/><stop offset="1" stop-color="#161a27"/>
+</linearGradient>
+<linearGradient id="gPod" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#333c54"/><stop offset="1" stop-color="#161a27"/>
+</linearGradient>
+<linearGradient id="gNose" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#242b3d"/><stop offset="1" stop-color="#0f121c"/>
+</linearGradient>
+<radialGradient id="gTyre" cx=".36" cy=".26" r=".92">
+  <stop offset="0" stop-color="#454c61"/><stop offset="1" stop-color="#101219"/>
+</radialGradient>
+<linearGradient id="gVisor" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#2b3552"/><stop offset="1" stop-color="#0a0d16"/>
+</linearGradient>
+<radialGradient id="gShadow" cx=".5" cy=".5" r=".5">
+  <stop offset="0" stop-color="#150c22" stop-opacity=".5"/>
+  <stop offset="1" stop-color="#150c22" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="gHeat" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#ffb020"/><stop offset="1" stop-color="#ff2d46"/>
+</linearGradient>
+</defs>
+<ellipse cx="400" cy="424" rx="322" ry="40" fill="url(#gShadow)"/>
+<g stroke="#14161f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+<path d="M240 144 L560 144 L552 180 L248 180 z" fill="#d244c0"/>
+<path d="M240 144 L560 144 L558 156 L242 156 z" fill="#e46ad4" stroke="none"/>
+<path d="M228 120 L258 126 L254 206 L224 200 z" fill="#242b3d"/>
+<path d="M232 164 L254 168 L253 180 L231 176 z" fill="#17c4d2" stroke="none"/>
+<path d="M540 120 L570 126 L566 206 L536 200 z" fill="#242b3d"/>
+<path d="M544 164 L566 168 L565 180 L543 176 z" fill="#17c4d2" stroke="none"/>
+<rect x="352" y="176" fill="#242b3d"/>
+<rect x="430" y="176" width="18" height="62" fill="#242b3d"/>
+<ellipse cx="120" cy="286" rx="54" ry="62" fill="url(#gTyre)"/><ellipse cx="120" cy="286" rx="45" ry="53" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(120 286) scale(1 1.148)"><circle r="33" fill="#79849c"/><circle r="28" fill="#ffb020"/><path d="M-2.3 -6.4 L-3.3 -25.3 L3.3 -25.3 L2.3 -6.4 z M5.4 -4.1 L23.0 -10.9 L25.0 -4.7 L6.8 0.2 z M5.6 3.8 L17.5 18.5 L12.2 22.4 L1.9 6.5 z M-1.9 6.5 L-12.2 22.4 L-17.5 18.5 L-5.6 3.8 z M-6.8 0.2 L-25.0 -4.7 L-23.0 -10.9 L-5.4 -4.1 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="6.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
+<ellipse cx="680" cy="286" rx="54" ry="62" fill="url(#gTyre)"/><ellipse cx="680" cy="286" rx="45" ry="53" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(680 286) scale(1 1.148)"><circle r="33" fill="#79849c"/><circle r="28" fill="#ffb020"/><path d="M-2.3 -6.4 L-3.3 -25.3 L3.3 -25.3 L2.3 -6.4 z M5.4 -4.1 L23.0 -10.9 L25.0 -4.7 L6.8 0.2 z M5.6 3.8 L17.5 18.5 L12.2 22.4 L1.9 6.5 z M-1.9 6.5 L-12.2 22.4 L-17.5 18.5 L-5.6 3.8 z M-6.8 0.2 L-25.0 -4.7 L-23.0 -10.9 L-5.4 -4.1 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="6.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
+<path d="M400 196 L474 214 L492 256 L308 256 L326 214 z" fill="#ff2d46"/>
+<path d="M336 230 L464 230 L470 248 L330 248 z" fill="#c01326" stroke="none"/>
+<path d="M400 100 L450 118 L460 166 L442 194 L358 194 L340 166 L350 118 z" fill="#eef2ff"/>
+<path d="M400 100 L450 118 L455 142 L345 142 L350 118 z" fill="#17c4d2"/>
+<path d="M354 150 L446 150 L440 180 L360 180 z" fill="url(#gVisor)"/>
+<path d="M366 158 L432 158 L428 166 L370 166 z" fill="#5f7bb8" stroke="none" opacity=".8"/>
+<path d="M232 262 L326 244 L334 348 L246 340 L220 302 z" fill="url(#gPod)"/><path d="M244 292 L318 282 L320 302 L248 310 z" fill="#17c4d2" stroke="none"/>
+<g transform="translate(800 0) scale(-1 1)"><path d="M232 262 L326 244 L334 348 L246 340 L220 302 z" fill="url(#gPod)"/><path d="M244 292 L318 282 L320 302 L248 310 z" fill="#17c4d2" stroke="none"/></g>
+<path d="M258 232 L286 236 L282 262 L262 258 z" fill="#0c0e16"/>
+<path d="M264 238 L280 241 L277 255 L267 253 z" fill="url(#gHeat)" stroke="none"/>
+<path d="M514 232 L542 236 L538 262 L518 258 z" fill="#0c0e16"/>
+<path d="M520 238 L536 241 L533 255 L523 253 z" fill="url(#gHeat)" stroke="none"/>
+<path d="M334 236 L466 236 L494 274 L510 352 L290 352 L306 274 z" fill="url(#gBody)"/>
+<path d="M340 252 L460 252 L466 268 L334 268 z" fill="#333c54" stroke="none"/>
+<path d="M312 300 L488 300 L492 318 L308 318 z" fill="#17c4d2" stroke="none" opacity=".9"/>
+<path d="M344 268 L456 268 L462 292 L436 292 L430 282 L370 282 L364 292 L338 292 z" fill="#0d1018" stroke-width="6"/>
+<path d="M318 264 L352 268 L354 296 L320 292 z" fill="#1b2130" stroke-width="6"/>
+<path d="M315 274 L353 277 L353 284 L315 281 z" fill="#17c4d2" stroke="none"/>
+<path d="M482 264 L448 268 L446 296 L480 292 z" fill="#1b2130" stroke-width="6"/>
+<path d="M485 274 L447 277 L447 284 L485 281 z" fill="#17c4d2" stroke="none"/>
+<path d="M316 302 L484 302 L512 382 L288 382 z" fill="url(#gNose)"/>
+<path d="M330 320 L390 330 L384 352 L326 342 z" fill="#05070d"/>
+<path d="M470 320 L410 330 L416 352 L474 342 z" fill="#05070d"/>
+<path d="M336 326 L384 334 L381 342 L333 335 z" fill="#ffb020" stroke="none"/>
+<path d="M464 326 L416 334 L419 342 L467 335 z" fill="#ffb020" stroke="none"/>
+<path d="M368 356 L432 356 L436 378 L364 378 z" fill="#eef2ff"/>
+<text x="400" y="376" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="900" text-anchor="middle" fill="#14161f" stroke="none" letter-spacing="1">01</text>
+<ellipse cx="180" cy="340" rx="72" ry="82" fill="url(#gTyre)"/><ellipse cx="180" cy="340" rx="63" ry="73" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(180 340) scale(1 1.139)"><circle r="41" fill="#79849c"/><circle r="36" fill="#17c4d2"/><path d="M-2.9 -8.3 L-4.3 -33.0 L4.3 -33.0 L2.9 -8.3 z M7.0 -5.4 L30.1 -14.3 L32.8 -6.1 L8.8 0.2 z M7.3 5.0 L22.9 24.2 L15.9 29.3 L2.5 8.5 z M-2.5 8.5 L-15.9 29.3 L-22.9 24.2 L-7.3 5.0 z M-8.8 0.2 L-32.8 -6.1 L-30.1 -14.3 L-7.0 -5.4 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="8.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
+<ellipse cx="620" cy="340" rx="72" ry="82" fill="url(#gTyre)"/><ellipse cx="620" cy="340" rx="63" ry="73" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(620 340) scale(1 1.139)"><circle r="41" fill="#79849c"/><circle r="36" fill="#17c4d2"/><path d="M-2.9 -8.3 L-4.3 -33.0 L4.3 -33.0 L2.9 -8.3 z M7.0 -5.4 L30.1 -14.3 L32.8 -6.1 L8.8 0.2 z M7.3 5.0 L22.9 24.2 L15.9 29.3 L2.5 8.5 z M-2.5 8.5 L-15.9 29.3 L-22.9 24.2 L-7.3 5.0 z M-8.8 0.2 L-32.8 -6.1 L-30.1 -14.3 L-7.0 -5.4 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="8.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
+<path d="M262 384 L538 384 L552 412 L248 412 z" fill="#242b3d"/>
+<path d="M262 384 L538 384 L536 394 L264 394 z" fill="#d244c0" stroke="none"/>
+<path d="M110 380 L154 386 L150 404 L106 398 z" fill="#ff2d46"/>
+<path d="M646 380 L690 386 L686 404 L642 398 z" fill="#ff2d46"/>
+</g>
+<g id="kartSpeed" stroke="#ffffff" stroke-width="11" stroke-linecap="round" opacity=".8">
+<path d="M46 206 h78"/>
+<path d="M14 262 h52"/>
+<path d="M34 326 h62"/>
+<path d="M754 206 h-78"/>
+<path d="M786 262 h-52"/>
+<path d="M766 326 h-62"/>
+</g>
 </svg></div>
       </div>
     </div>
 
+  </section>
+
+  <section class="statband">
     <div class="wrap">
-      <ul class="stats" style="list-style:none;padding-left:0;margin-left:0;margin-right:0">
+      <ul class="stats">
         <li class="stat"><b>34</b><span data-i18n="stat.rides"></span></li>
         <li class="stat"><b>650 m</b><span data-i18n="stat.track"></span></li>
         <li class="stat"><b>75</b><span data-i18n="stat.speed"></span></li>
@@ -1016,7 +985,6 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
 
   <!-- ─────────── karting (dark) ─────────── -->
   <section class="sec kartzone" id="karting">
-    <div class="kz-photo" aria-hidden="true"></div>
     <div class="wrap">
       <div class="sec-head rv">
         <span class="kicker">GOKART RACING</span>
