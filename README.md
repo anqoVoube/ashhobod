@@ -135,6 +135,13 @@ Three things about this renderer are easy to break again:
   testing `nz < 0`. A horizontal face has `nz = ±sin(lean)`, which crosses zero twice per lean
   cycle — that version made the entire upper surface of the kart strobe between lit and ambient
   about every 1.6 seconds.
+- **Coplanar faces.** A painter's sort orders faces by average depth, so two coplanar overlapping
+  faces have no defined order. The wheel spokes shipped drawn on top of the rim disc and roughly
+  half of them were painted out every frame — they blinked instead of turning, which was the exact
+  opposite of why they were added. Nudging them outboard does not fix it: the in-plane centroid
+  offset is ~0.10 world units against ~0.001 for any nudge small enough to stay invisible. The rim
+  face now *tiles* — spoke wedges and gap wedges side by side, no overlap, so the order cannot be
+  wrong. Anything laid on a surface must either tile it or stand well clear of it.
 - **Zero-size first paint.** A reload on `#/booking` routes before this script runs, so the canvas
   measures 0×0 and paints nothing. A `ResizeObserver` on the canvas repaints as soon as it has a
   size; without it, reduced-motion users returning to the home route get an empty hero.
