@@ -1988,7 +1988,7 @@ route();
   var faces = [];   // bodywork, fixed
   var wheels = [];  // {c:[x,y,z], steer:bool, f:[face]} — spin about their own axle
 
-  function push(list, v, c, sm) { list.push({ v: v, c: c, sm: !!sm }); }
+  function push(list, v, c, sm, vn) { list.push({ v: v, c: c, sm: !!sm, vn: vn }); }
 
   function box(list, x0, x1, y0, y1, z0, z1, c, top, side) {
     top = top || c; side = side || c;
@@ -2050,9 +2050,15 @@ route();
       L.push([cx - hw, cy + Math.cos(a) * r, cz + Math.sin(a) * r]);
       R.push([cx + hw, cy + Math.cos(a) * r, cz + Math.sin(a) * r]);
     }
+    var N = [];
+    for (i = 0; i < segs; i++) {
+      a = (i / segs) * Math.PI * 2;
+      N.push([0, Math.cos(a), Math.sin(a)]);
+    }
     for (i = 0; i < segs; i++) {
       j = (i + 1) % segs;
-      push(list, [L[i], L[j], R[j], R[i]], side, sm);
+      // per-vertex normals turn 16 flat bands into one continuous curve
+      push(list, [L[i], L[j], R[j], R[i]], side, sm, [N[i], N[j], N[j], N[i]]);
     }
     push(list, L.slice().reverse(), cap);
     push(list, R.slice(), cap);
@@ -2069,8 +2075,12 @@ route();
       var t0 = Math.PI * i / lat, t1 = Math.PI * (i + 1) / lat;
       for (j = 0; j < lon; j++) {
         var f0 = 2 * Math.PI * j / lon, f1 = 2 * Math.PI * (j + 1) / lon;
+        function NV(t, f) {
+          return [Math.sin(t) * Math.cos(f), Math.cos(t), Math.sin(t) * Math.sin(f)];
+        }
         push(list, [P(t0,f0), P(t0,f1), P(t1,f1), P(t1,f0)],
-             (i < lat * 0.34 && capColor) ? capColor : c, true);
+             (i < lat * 0.34 && capColor) ? capColor : c, true,
+             [NV(t0,f0), NV(t0,f1), NV(t1,f1), NV(t1,f0)]);
       }
     }
   }
@@ -2269,24 +2279,33 @@ route();
 
   function cl(v) { return v < 0 ? 0 : v > 255 ? 255 : v | 0; }
 
-  function shade(c, n, ao) {
+  function lum(n, ao) {
     var kd = Math.max(0, n[0]*KEY[0]  + n[1]*KEY[1]  + n[2]*KEY[2]);
     var fd = Math.max(0, n[0]*FILL[0] + n[1]*FILL[1] + n[2]*FILL[2]);
     var rd = Math.max(0, n[0]*RIM[0]  + n[1]*RIM[1]  + n[2]*RIM[2]);
-    var k = (0.58 + 0.50 * kd + 0.16 * fd) * ao;
-    var rim = 0.26 * rd * rd * ao;
-    return "rgb(" + cl(c[0]*k + rim*116) + "," +
-                    cl(c[1]*k + rim*144) + "," +
-                    cl(c[2]*k + rim*182) + ")";
+    return { k: (0.58 + 0.50 * kd + 0.16 * fd) * ao, rim: 0.26 * rd * rd * ao };
   }
+
+  function tint(c, t) {
+    return "rgb(" + cl(c[0]*t.k + t.rim*116) + "," +
+                    cl(c[1]*t.k + t.rim*144) + "," +
+                    cl(c[2]*t.k + t.rim*182) + ")";
+  }
+
+  function shade(c, n, ao) { return tint(c, lum(n, ao)); }
 
   /* ─────────────────────────────── render ──────────────────────────────── */
   var drive = 0, spin = 0, W = 0, H = 0, dpr = 1;
+  // Backing-store scale. Sampling above CSS resolution is what smooths the long
+  // diagonals; canvas's own edge AA is not enough at 1x. Measured on this model at
+  // a 720x424 canvas: 1x 6.7ms, 1.5x 9.4ms, 2x 11.4ms per frame. The loop drops
+  // this to 1 if the device turns out not to afford it.
+  var maxScale = 2;
 
   function resize() {
     var r = canvas.getBoundingClientRect();
     if (!r.width) return false;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(Math.max(window.devicePixelRatio || 1, 1.5), maxScale);
     W = r.width; H = r.height;
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
@@ -2320,13 +2339,17 @@ route();
     for (k = 0; k < wheels.length; k++) {
       wl = wheels[k];
       for (j = 0; j < wl.f.length; j++) {
-        var src = wl.f[j].v, dst = [];
+        var src = wl.f[j].v, dst = [], srcN = wl.f[j].vn, dstN = srcN ? [] : null;
         for (i = 0; i < src.length; i++) {
           p = rotX(src[i], spin);
           if (wl.steer) p = rotY(p, steer);
           dst.push([p[0] + wl.c[0], p[1] + wl.c[1], p[2] + wl.c[2]]);
+          if (srcN) {
+            var q = rotX(srcN[i], spin);
+            dstN.push(wl.steer ? rotY(q, steer) : q);
+          }
         }
-        list.push({ v: dst, c: wl.f[j].c, sm: wl.f[j].sm });
+        list.push({ v: dst, c: wl.f[j].c, sm: wl.f[j].sm, vn: dstN });
       }
     }
 
@@ -2362,15 +2385,43 @@ route();
       var cxw = 0, cyw = 0, czw = 0;
       for (j = 0; j < n; j++) { cxw += world[j][0]; cyw += world[j][1]; czw += world[j][2]; }
       cxw /= n; cyw /= n; czw /= n;
-      if (nx * (0 - cxw) + ny * (camY - cyw) + nz * (dist - czw) < 0) {
-        nx = -nx; ny = -ny; nz = -nz;
-      }
+      var flip = nx * (0 - cxw) + ny * (camY - cyw) + nz * (dist - czw) < 0;
+      if (flip) { nx = -nx; ny = -ny; nz = -nz; }
 
       // cheap ambient occlusion: the closer a face sits to the ground, the less
       // sky it can see. Grounds the underbody instead of letting it float.
       var ao = 0.76 + 0.24 * Math.min(1, Math.max(0, cyw) / 0.62);
-      out.push({ p: pts, z: zsum / n, s: shade(list[i].c, [nx, ny, nz], ao),
-                 sm: list[i].sm, n: nz });
+
+      // Curved surfaces carry per-vertex normals. Canvas cannot interpolate a
+      // colour across a polygon, but shading on a tyre or a helmet varies mostly
+      // along one direction, so a two-stop linear gradient between the darkest
+      // and the brightest vertex reads as smooth and costs one gradient object.
+      var fill, edge, vn = list[i].vn;
+      if (vn) {
+        var lo = 1e9, hi = -1e9, iLo = 0, iHi = 0, tints = [], vnj, tj, bj;
+        for (j = 0; j < n; j++) {
+          vnj = rotX(rotY(vn[j], yaw), lean);
+          if (flip) { vnj = [-vnj[0], -vnj[1], -vnj[2]]; }
+          tj = lum(vnj, ao);
+          tints.push(tj);
+          bj = tj.k + tj.rim;
+          if (bj < lo) { lo = bj; iLo = j; }
+          if (bj > hi) { hi = bj; iHi = j; }
+        }
+        edge = tint(list[i].c, tints[iHi]);
+        if (hi - lo < 0.012 || iLo === iHi) {
+          fill = edge;
+        } else {
+          var gr = ctx.createLinearGradient(pts[iLo][0], pts[iLo][1], pts[iHi][0], pts[iHi][1]);
+          gr.addColorStop(0, tint(list[i].c, tints[iLo]));
+          gr.addColorStop(1, edge);
+          fill = gr;
+        }
+      } else {
+        fill = edge = shade(list[i].c, [nx, ny, nz], ao);
+      }
+
+      out.push({ p: pts, z: zsum / n, s: fill, sm: list[i].sm, n: nz, edge: edge });
     }
 
     out.sort(function (a, b) { return b.z - a.z; });
@@ -2410,7 +2461,9 @@ route();
       // Smooth surfaces get their seams painted in their own colour; only faces
       // near the silhouette (normal nearly perpendicular to the view) keep an ink
       // edge, which outlines the shape without faceting it.
-      if (o.sm && o.n > 0.34) { ctx.strokeStyle = o.s; ctx.lineWidth = 1; }
+      // a gradient is not a valid stroke colour here — smooth faces stroke with
+      // their own brightest tint to close the seam
+      if (o.sm && o.n > 0.34) { ctx.strokeStyle = o.edge; ctx.lineWidth = 1; }
       else { ctx.strokeStyle = INK; ctx.lineWidth = lw; }
       ctx.stroke();
     }
@@ -2428,13 +2481,23 @@ route();
     drive = p * p;
   }
 
-  var last = 0;
+  var last = 0, overBudget = 0;
   function loop(ts) {
     if (!running) return;
     // scale by elapsed time, not by frame count — otherwise the wheels spin twice
     // as fast on a 120Hz screen. Clamped so a backgrounded tab does not jump.
-    var dt = last ? Math.min((ts - last) / 16.67, 3) : 1;
+    var ms = last ? ts - last : 16.67;
+    var dt = Math.min(ms / 16.67, 3);
     last = ts;
+
+    // Rather than guess at device capability, watch the actual frame time and
+    // give up the supersampling once if this machine cannot hold the budget.
+    // One-way, so it cannot oscillate between the two costs.
+    if (maxScale > 1) {
+      if (ms > 26) overBudget++; else if (overBudget) overBudget--;
+      if (overBudget > 30) { maxScale = 1; overBudget = 0; resize(); }
+    }
+
     spin += (0.30 + drive * 0.55) * dt;
     readScroll();
     frame();

@@ -124,6 +124,17 @@ The render loop only runs while the hero is on screen (IntersectionObserver), is
 frame and updates only on scroll. Wheel speed is scaled by elapsed time, not by frame count, so it
 does not double on a 120Hz display.
 
+Curved surfaces are smooth-shaded. Canvas cannot interpolate a colour across a polygon, but the
+shading on a tyre or a helmet varies mostly along one direction, so each of those faces carries
+per-vertex normals and is filled with a two-stop linear gradient between its darkest and brightest
+corner. Sixteen flat bands around a tyre become one continuous curve for about 0.9ms a frame.
+
+The canvas is also sampled above CSS resolution, which is what smooths the long diagonals —
+canvas's own edge anti-aliasing is not enough at 1×. Measured on this model at a 720×424 canvas:
+1× 6.7ms, 1.5× 9.4ms, 2× 11.4ms per frame. Rather than guess at device capability, the loop watches
+its own frame time and gives up the supersampling once, permanently, if the machine cannot hold the
+budget — one-way, so it cannot oscillate between the two costs.
+
 Three things about this renderer are easy to break again:
 
 - **Winding.** Back faces are culled by the sign of the screen-space signed area, so a primitive
