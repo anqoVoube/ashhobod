@@ -10,7 +10,8 @@ Open `index.html` in any browser. No server, no build step, no internet needed.
 
 **Landing page** (`#/`)
 - Hero: pastel sky, drifting clouds, a drawn 2D park skyline, and the kart driving at the viewer
-  down the track — the "картинг едет на нас, а позади парк" from the brief
+  down the track — the "картинг едет на нас, а позади парк" from the brief. Scroll and it
+  accelerates toward the camera in real 3D.
 - Ticker strip, bracelet tariffs, attractions grid with filters, photo gallery, cashback, Instagram, contacts
 - **Karting zone** flips to dark carbon + neon, echoing the `egokarting.ru` reference
 
@@ -34,7 +35,7 @@ responsive down to 360px, keyboard accessible, `prefers-reduced-motion` respecte
 index.html               ← the deliverable. Self-contained, ~580 KB, open it directly
 build.py                 ← regenerates index.html from src/ + assets/
 src/index.template.html  ← EDIT THIS, not index.html
-src/kart.svg             ← hero kart          (generated: python3 src/make_kart.py)
+src/kart-{back,mid,front}.svg  ← hero kart, three depth layers (python3 src/make_kart.py)
 src/park.svg             ← hero park skyline  (generated: python3 src/make_park.py)
 src/make_kart.py         ← tweak the kart here, then rerun it + build.py
 src/make_park.py         ← tweak the skyline here, then rerun it + build.py
@@ -104,6 +105,19 @@ stays exact and is cheap to re-tune.
 **The kart is deliberately the one hard-edged thing on the page.** Everything else is soft and
 pastel; the kart is dark carbon, angular, on fat slicks, with the brand colours as racing accents.
 That contrast is what makes it read as the product rather than as decoration.
+
+**It is drawn flat but staged in 3D.** `.stage` carries a 1100px perspective and the kart is split
+into three SVGs — rear wing and rear wheels, driver and chassis, nose and front wheels — stacked at
+`translateZ` −72 / 0 / +72. Each layer is scale-compensated by `(1100 − z) / 1100`, so at rest the
+kart looks exactly as drawn. Scrolling drives it 430px toward the camera; the nearer layers then
+enlarge faster than the far ones and the shape gains real volume, without a WebGL runtime or a
+single external byte. The scroll handler is rAF-throttled, skips work while the hero is off-route,
+and never attaches under `prefers-reduced-motion`.
+
+Two constraints worth remembering if you edit this: never put a `filter` on `.kart` (it forces
+`transform-style` back to `flat` and the layers collapse into a sticker), and keep the gradient ids
+suffixed per layer — all three SVGs share one document, so duplicate ids silently resolve to
+whichever parsed first.
 
 **Typography is a deliberate system stack**, not a webfont. The page has to render Uzbek Latin
 (`o'`, `g'`) and Russian Cyrillic side by side, and a display face missing Cyrillic would silently

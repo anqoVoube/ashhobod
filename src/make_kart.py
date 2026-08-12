@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate src/kart.svg — the hero kart, head-on and coming at the viewer.
+"""Generate the hero kart as three depth layers.
 
     python3 src/make_kart.py
 
@@ -7,7 +7,15 @@ Angular rather than rounded, dark carbon body with the brand colours used as rac
 accents, fat slicks on five-spoke rims, splitter and endplated rear wing. The outline
 idiom still matches the logo, but the forms are wedges, not bubbles.
 
-Keeps the #kartSpeed group id — the stylesheet animates those streaks.
+Emits kart-back.svg / kart-mid.svg / kart-front.svg, which the page stacks on the same
+viewBox at different translateZ. At rest each layer is scale-compensated so the kart
+looks exactly as drawn; once it starts driving toward the viewer the layers separate at
+different rates and the thing reads as a solid object rather than a sticker.
+
+Gradient ids carry a per-layer suffix — all three SVGs live in one document, and
+duplicate ids would silently collapse to whichever came first.
+
+#kartSpeed lives on the back layer; the stylesheet animates those streaks.
 """
 import math
 import pathlib
@@ -28,8 +36,17 @@ RIM = "#ccd5ea"
 RIM_D = "#79849c"
 VISOR = "#0a0d16"
 
-out = []
-add = out.append
+LAYERS = {"back": [], "mid": [], "front": []}
+LAYER = "back"          # whichever layer add() is currently filling
+
+
+def add(markup):
+    LAYERS[LAYER].append(markup)
+
+
+def layer(name):
+    global LAYER
+    LAYER = name
 
 
 def mirror(d):
@@ -71,8 +88,7 @@ def wheel(cx, cy, rx, ry, hub, accent):
 
 
 # ═══════════════════════════════════════════════ compose
-add(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}">')
-add(f'''<defs>
+DEFS = f'''<defs>
 <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
   <stop offset="0" stop-color="{BODY_HI}"/><stop offset="1" stop-color="{BODY_LO}"/>
 </linearGradient>
@@ -95,11 +111,13 @@ add(f'''<defs>
 <linearGradient id="gHeat" x1="0" y1="0" x2="1" y2="0">
   <stop offset="0" stop-color="{AMBER}"/><stop offset="1" stop-color="{RED}"/>
 </linearGradient>
-</defs>''')
-
-add(f'<ellipse cx="{CX}" cy="424" rx="322" ry="40" fill="url(#gShadow)"/>')
+</defs>'''
 
 S = f'stroke="{INK}" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"'
+
+# ── back layer: everything the driver sits in front of ───────────────────────
+layer("back")
+add(f'<ellipse cx="{CX}" cy="424" rx="322" ry="40" fill="url(#gShadow)"/>')
 add(f'<g {S}>')
 
 # ── rear wing ────────────────────────────────────────────────────────────────
@@ -115,6 +133,12 @@ add(f'<rect x="430" y="176" width="18" height="62" fill="{CARBON}"/>')
 # ── rear wheels ──────────────────────────────────────────────────────────────
 add(wheel(120, 286, 54, 62, 26, AMBER))
 add(wheel(680, 286, 54, 62, 26, AMBER))
+
+add('</g>')
+
+# ── mid layer: driver, pods, chassis ─────────────────────────────────────────
+layer("mid")
+add(f'<g {S}>')
 
 # ── driver ───────────────────────────────────────────────────────────────────
 add(f'<path d="M400 196 L474 214 L492 256 L308 256 L326 214 z" fill="{RED}"/>')
@@ -149,6 +173,12 @@ for s_ in (-1, 1):
     add(f'<path d="M{a+3*s_} 274 L{b-1*s_} 277 L{b-1*s_} 284 L{a+3*s_} 281 z" '
         f'fill="{TEAL}" stroke="none"/>')
 
+add('</g>')
+
+# ── front layer: the bodywork closest to the viewer ──────────────────────────
+layer("front")
+add(f'<g {S}>')
+
 # ── nose ─────────────────────────────────────────────────────────────────────
 add(f'<path d="M316 302 L484 302 L512 382 L288 382 z" fill="url(#gNose)"/>')
 # angry intakes: inner edge drops toward the centreline
@@ -173,14 +203,23 @@ for s in (-1, 1):
     add(f'<path d="M{x-22} 380 L{x+22} 386 L{x+18} 404 L{x-26} 398 z" fill="{RED}"/>')
 add('</g>')
 
-# ── speed streaks (animated by the stylesheet) ───────────────────────────────
+# ── speed streaks, behind the car ────────────────────────────────────────────
+layer("back")
 add('<g id="kartSpeed" stroke="#ffffff" stroke-width="11" stroke-linecap="round" opacity=".8">')
-for x, y, w, s in [(46, 206, 78, 1), (14, 262, 52, 1), (34, 326, 62, 1),
-                   (754, 206, 78, -1), (786, 262, 52, -1), (766, 326, 62, -1)]:
-    add(f'<path d="M{x} {y} h{w*s}"/>')
+for x, y, w, sgn in [(46, 206, 78, 1), (14, 262, 52, 1), (34, 326, 62, 1),
+                     (754, 206, 78, -1), (786, 262, 52, -1), (766, 326, 62, -1)]:
+    add(f'<path d="M{x} {y} h{w*sgn}"/>')
 add('</g>')
-add('</svg>')
 
-path = pathlib.Path(__file__).with_name("kart.svg")
-path.write_text("\n".join(out), encoding="utf-8")
-print(f"wrote {path} ({path.stat().st_size/1024:.1f} KB)")
+# ═══════════════════════════════════════════════ emit
+for name, body in LAYERS.items():
+    markup = "\n".join(body)
+    defs = DEFS
+    for gid in ("gBody", "gPod", "gNose", "gTyre", "gVisor", "gShadow", "gHeat"):
+        defs = defs.replace(f'id="{gid}"', f'id="{gid}-{name}"')
+        markup = markup.replace(f"url(#{gid})", f"url(#{gid}-{name})")
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" '
+           f'class="kart-layer kart-{name}" aria-hidden="true">\n{defs}\n{markup}\n</svg>')
+    path = pathlib.Path(__file__).with_name(f"kart-{name}.svg")
+    path.write_text(svg, encoding="utf-8")
+    print(f"wrote {path.name} ({path.stat().st_size/1024:.1f} KB)")

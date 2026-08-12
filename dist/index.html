@@ -321,14 +321,38 @@ button{ font:inherit; color:inherit; }
 .stat span{ font-size:.76rem; color:var(--ink-3); font-weight:700; }
 
 /* kart stage */
-.stage{ position:relative; min-height:clamp(220px,30vw,360px); display:grid; place-items:end center; }
-.kart{ position:relative; z-index:2; width:min(100%,560px); filter:drop-shadow(0 26px 26px rgba(45,15,70,.28)); }
-.kart svg{ width:100%; height:auto; display:block; }
-.kart{ animation:rev 2.4s ease-in-out infinite; }
+.stage{
+  position:relative; min-height:clamp(220px,30vw,360px); display:grid; place-items:end center;
+  perspective:1100px; perspective-origin:50% 40%;
+}
+/* --drive runs 0..1 as the hero scrolls past; the kart translates toward the camera
+   in real 3D, so the three layers separate and it stops reading as a flat sticker.
+   No filter on this element -- a filter would force transform-style back to flat. */
+.kart{
+  --drive:0;
+  position:relative; z-index:2; width:min(100%,560px); aspect-ratio:800/470;
+  transform-style:preserve-3d;
+  transform:
+    translate3d(calc(var(--drive) * 26px), calc(var(--drive) * 140px), calc(var(--drive) * 430px))
+    rotateX(calc(var(--drive) * -3deg));
+}
+.kart-rig{ position:absolute; inset:0; transform-style:preserve-3d;
+           animation:rev 2.6s ease-in-out infinite; }
+.kart-layer{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+/* the scale cancels the enlargement each z offset would otherwise cause, so at rest
+   the kart looks exactly as drawn — the volume only appears once it moves.
+   factor = (perspective - z) / perspective, with perspective 1100px */
+.kart-back { transform:translateZ(-72px) scale(1.0655); }
+.kart-mid  { transform:translateZ(0); }
+.kart-front{ transform:translateZ(72px)  scale(0.9345); }
+
+#kartSpeed{ opacity:calc(.3 + var(--drive) * .7); }
+#kartSpeed path{ stroke-width:calc(9px + var(--drive) * 12px); }
+
 @keyframes rev{
   0%,100%{ transform:translateY(0) rotate(0deg) }
-  25%{ transform:translateY(-6px) rotate(-.5deg) }
-  75%{ transform:translateY(-3px) rotate(.5deg) }
+  25%{ transform:translateY(-5px) rotate(-.4deg) }
+  75%{ transform:translateY(-2px) rotate(.4deg) }
 }
 #kartSpeed path{ animation:whoosh 1s linear infinite; }
 #kartSpeed path:nth-child(2),#kartSpeed path:nth-child(5){ animation-delay:-.33s }
@@ -892,32 +916,34 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
       </div>
 
       <div class="stage">
-        <div class="kart" role="img" data-i18n-aria="hero.kartAlt"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470">
+        <div class="kart" role="img" data-i18n-aria="hero.kartAlt">
+          <div class="kart-rig">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470" class="kart-layer kart-back" aria-hidden="true">
 <defs>
-<linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
+<linearGradient id="gBody-back" x1="0" y1="0" x2="0" y2="1">
   <stop offset="0" stop-color="#3d4661"/><stop offset="1" stop-color="#161a27"/>
 </linearGradient>
-<linearGradient id="gPod" x1="0" y1="0" x2="0" y2="1">
+<linearGradient id="gPod-back" x1="0" y1="0" x2="0" y2="1">
   <stop offset="0" stop-color="#333c54"/><stop offset="1" stop-color="#161a27"/>
 </linearGradient>
-<linearGradient id="gNose" x1="0" y1="0" x2="0" y2="1">
+<linearGradient id="gNose-back" x1="0" y1="0" x2="0" y2="1">
   <stop offset="0" stop-color="#242b3d"/><stop offset="1" stop-color="#0f121c"/>
 </linearGradient>
-<radialGradient id="gTyre" cx=".36" cy=".26" r=".92">
+<radialGradient id="gTyre-back" cx=".36" cy=".26" r=".92">
   <stop offset="0" stop-color="#454c61"/><stop offset="1" stop-color="#101219"/>
 </radialGradient>
-<linearGradient id="gVisor" x1="0" y1="0" x2="1" y2="1">
+<linearGradient id="gVisor-back" x1="0" y1="0" x2="1" y2="1">
   <stop offset="0" stop-color="#2b3552"/><stop offset="1" stop-color="#0a0d16"/>
 </linearGradient>
-<radialGradient id="gShadow" cx=".5" cy=".5" r=".5">
+<radialGradient id="gShadow-back" cx=".5" cy=".5" r=".5">
   <stop offset="0" stop-color="#150c22" stop-opacity=".5"/>
   <stop offset="1" stop-color="#150c22" stop-opacity="0"/>
 </radialGradient>
-<linearGradient id="gHeat" x1="0" y1="0" x2="1" y2="0">
+<linearGradient id="gHeat-back" x1="0" y1="0" x2="1" y2="0">
   <stop offset="0" stop-color="#ffb020"/><stop offset="1" stop-color="#ff2d46"/>
 </linearGradient>
 </defs>
-<ellipse cx="400" cy="424" rx="322" ry="40" fill="url(#gShadow)"/>
+<ellipse cx="400" cy="424" rx="322" ry="40" fill="url(#gShadow-back)"/>
 <g stroke="#14161f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
 <path d="M240 144 L560 144 L552 180 L248 180 z" fill="#d244c0"/>
 <path d="M240 144 L560 144 L558 156 L242 156 z" fill="#e46ad4" stroke="none"/>
@@ -927,41 +953,8 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
 <path d="M544 164 L566 168 L565 180 L543 176 z" fill="#17c4d2" stroke="none"/>
 <rect x="352" y="176" fill="#242b3d"/>
 <rect x="430" y="176" width="18" height="62" fill="#242b3d"/>
-<ellipse cx="120" cy="286" rx="54" ry="62" fill="url(#gTyre)"/><ellipse cx="120" cy="286" rx="45" ry="53" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(120 286) scale(1 1.148)"><circle r="33" fill="#79849c"/><circle r="28" fill="#ffb020"/><path d="M-2.3 -6.4 L-3.3 -25.3 L3.3 -25.3 L2.3 -6.4 z M5.4 -4.1 L23.0 -10.9 L25.0 -4.7 L6.8 0.2 z M5.6 3.8 L17.5 18.5 L12.2 22.4 L1.9 6.5 z M-1.9 6.5 L-12.2 22.4 L-17.5 18.5 L-5.6 3.8 z M-6.8 0.2 L-25.0 -4.7 L-23.0 -10.9 L-5.4 -4.1 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="6.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
-<ellipse cx="680" cy="286" rx="54" ry="62" fill="url(#gTyre)"/><ellipse cx="680" cy="286" rx="45" ry="53" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(680 286) scale(1 1.148)"><circle r="33" fill="#79849c"/><circle r="28" fill="#ffb020"/><path d="M-2.3 -6.4 L-3.3 -25.3 L3.3 -25.3 L2.3 -6.4 z M5.4 -4.1 L23.0 -10.9 L25.0 -4.7 L6.8 0.2 z M5.6 3.8 L17.5 18.5 L12.2 22.4 L1.9 6.5 z M-1.9 6.5 L-12.2 22.4 L-17.5 18.5 L-5.6 3.8 z M-6.8 0.2 L-25.0 -4.7 L-23.0 -10.9 L-5.4 -4.1 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="6.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
-<path d="M400 196 L474 214 L492 256 L308 256 L326 214 z" fill="#ff2d46"/>
-<path d="M336 230 L464 230 L470 248 L330 248 z" fill="#c01326" stroke="none"/>
-<path d="M400 100 L450 118 L460 166 L442 194 L358 194 L340 166 L350 118 z" fill="#eef2ff"/>
-<path d="M400 100 L450 118 L455 142 L345 142 L350 118 z" fill="#17c4d2"/>
-<path d="M354 150 L446 150 L440 180 L360 180 z" fill="url(#gVisor)"/>
-<path d="M366 158 L432 158 L428 166 L370 166 z" fill="#5f7bb8" stroke="none" opacity=".8"/>
-<path d="M232 262 L326 244 L334 348 L246 340 L220 302 z" fill="url(#gPod)"/><path d="M244 292 L318 282 L320 302 L248 310 z" fill="#17c4d2" stroke="none"/>
-<g transform="translate(800 0) scale(-1 1)"><path d="M232 262 L326 244 L334 348 L246 340 L220 302 z" fill="url(#gPod)"/><path d="M244 292 L318 282 L320 302 L248 310 z" fill="#17c4d2" stroke="none"/></g>
-<path d="M258 232 L286 236 L282 262 L262 258 z" fill="#0c0e16"/>
-<path d="M264 238 L280 241 L277 255 L267 253 z" fill="url(#gHeat)" stroke="none"/>
-<path d="M514 232 L542 236 L538 262 L518 258 z" fill="#0c0e16"/>
-<path d="M520 238 L536 241 L533 255 L523 253 z" fill="url(#gHeat)" stroke="none"/>
-<path d="M334 236 L466 236 L494 274 L510 352 L290 352 L306 274 z" fill="url(#gBody)"/>
-<path d="M340 252 L460 252 L466 268 L334 268 z" fill="#333c54" stroke="none"/>
-<path d="M312 300 L488 300 L492 318 L308 318 z" fill="#17c4d2" stroke="none" opacity=".9"/>
-<path d="M344 268 L456 268 L462 292 L436 292 L430 282 L370 282 L364 292 L338 292 z" fill="#0d1018" stroke-width="6"/>
-<path d="M318 264 L352 268 L354 296 L320 292 z" fill="#1b2130" stroke-width="6"/>
-<path d="M315 274 L353 277 L353 284 L315 281 z" fill="#17c4d2" stroke="none"/>
-<path d="M482 264 L448 268 L446 296 L480 292 z" fill="#1b2130" stroke-width="6"/>
-<path d="M485 274 L447 277 L447 284 L485 281 z" fill="#17c4d2" stroke="none"/>
-<path d="M316 302 L484 302 L512 382 L288 382 z" fill="url(#gNose)"/>
-<path d="M330 320 L390 330 L384 352 L326 342 z" fill="#05070d"/>
-<path d="M470 320 L410 330 L416 352 L474 342 z" fill="#05070d"/>
-<path d="M336 326 L384 334 L381 342 L333 335 z" fill="#ffb020" stroke="none"/>
-<path d="M464 326 L416 334 L419 342 L467 335 z" fill="#ffb020" stroke="none"/>
-<path d="M368 356 L432 356 L436 378 L364 378 z" fill="#eef2ff"/>
-<text x="400" y="376" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="900" text-anchor="middle" fill="#14161f" stroke="none" letter-spacing="1">01</text>
-<ellipse cx="180" cy="340" rx="72" ry="82" fill="url(#gTyre)"/><ellipse cx="180" cy="340" rx="63" ry="73" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(180 340) scale(1 1.139)"><circle r="41" fill="#79849c"/><circle r="36" fill="#17c4d2"/><path d="M-2.9 -8.3 L-4.3 -33.0 L4.3 -33.0 L2.9 -8.3 z M7.0 -5.4 L30.1 -14.3 L32.8 -6.1 L8.8 0.2 z M7.3 5.0 L22.9 24.2 L15.9 29.3 L2.5 8.5 z M-2.5 8.5 L-15.9 29.3 L-22.9 24.2 L-7.3 5.0 z M-8.8 0.2 L-32.8 -6.1 L-30.1 -14.3 L-7.0 -5.4 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="8.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
-<ellipse cx="620" cy="340" rx="72" ry="82" fill="url(#gTyre)"/><ellipse cx="620" cy="340" rx="63" ry="73" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(620 340) scale(1 1.139)"><circle r="41" fill="#79849c"/><circle r="36" fill="#17c4d2"/><path d="M-2.9 -8.3 L-4.3 -33.0 L4.3 -33.0 L2.9 -8.3 z M7.0 -5.4 L30.1 -14.3 L32.8 -6.1 L8.8 0.2 z M7.3 5.0 L22.9 24.2 L15.9 29.3 L2.5 8.5 z M-2.5 8.5 L-15.9 29.3 L-22.9 24.2 L-7.3 5.0 z M-8.8 0.2 L-32.8 -6.1 L-30.1 -14.3 L-7.0 -5.4 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="8.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
-<path d="M262 384 L538 384 L552 412 L248 412 z" fill="#242b3d"/>
-<path d="M262 384 L538 384 L536 394 L264 394 z" fill="#d244c0" stroke="none"/>
-<path d="M110 380 L154 386 L150 404 L106 398 z" fill="#ff2d46"/>
-<path d="M646 380 L690 386 L686 404 L642 398 z" fill="#ff2d46"/>
+<ellipse cx="120" cy="286" rx="54" ry="62" fill="url(#gTyre-back)"/><ellipse cx="120" cy="286" rx="45" ry="53" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(120 286) scale(1 1.148)"><circle r="33" fill="#79849c"/><circle r="28" fill="#ffb020"/><path d="M-2.3 -6.4 L-3.3 -25.3 L3.3 -25.3 L2.3 -6.4 z M5.4 -4.1 L23.0 -10.9 L25.0 -4.7 L6.8 0.2 z M5.6 3.8 L17.5 18.5 L12.2 22.4 L1.9 6.5 z M-1.9 6.5 L-12.2 22.4 L-17.5 18.5 L-5.6 3.8 z M-6.8 0.2 L-25.0 -4.7 L-23.0 -10.9 L-5.4 -4.1 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="6.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
+<ellipse cx="680" cy="286" rx="54" ry="62" fill="url(#gTyre-back)"/><ellipse cx="680" cy="286" rx="45" ry="53" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(680 286) scale(1 1.148)"><circle r="33" fill="#79849c"/><circle r="28" fill="#ffb020"/><path d="M-2.3 -6.4 L-3.3 -25.3 L3.3 -25.3 L2.3 -6.4 z M5.4 -4.1 L23.0 -10.9 L25.0 -4.7 L6.8 0.2 z M5.6 3.8 L17.5 18.5 L12.2 22.4 L1.9 6.5 z M-1.9 6.5 L-12.2 22.4 L-17.5 18.5 L-5.6 3.8 z M-6.8 0.2 L-25.0 -4.7 L-23.0 -10.9 L-5.4 -4.1 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="6.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
 </g>
 <g id="kartSpeed" stroke="#ffffff" stroke-width="11" stroke-linecap="round" opacity=".8">
 <path d="M46 206 h78"/>
@@ -971,7 +964,98 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
 <path d="M786 262 h-52"/>
 <path d="M766 326 h-62"/>
 </g>
-</svg></div>
+</svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470" class="kart-layer kart-mid" aria-hidden="true">
+<defs>
+<linearGradient id="gBody-mid" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#3d4661"/><stop offset="1" stop-color="#161a27"/>
+</linearGradient>
+<linearGradient id="gPod-mid" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#333c54"/><stop offset="1" stop-color="#161a27"/>
+</linearGradient>
+<linearGradient id="gNose-mid" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#242b3d"/><stop offset="1" stop-color="#0f121c"/>
+</linearGradient>
+<radialGradient id="gTyre-mid" cx=".36" cy=".26" r=".92">
+  <stop offset="0" stop-color="#454c61"/><stop offset="1" stop-color="#101219"/>
+</radialGradient>
+<linearGradient id="gVisor-mid" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#2b3552"/><stop offset="1" stop-color="#0a0d16"/>
+</linearGradient>
+<radialGradient id="gShadow-mid" cx=".5" cy=".5" r=".5">
+  <stop offset="0" stop-color="#150c22" stop-opacity=".5"/>
+  <stop offset="1" stop-color="#150c22" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="gHeat-mid" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#ffb020"/><stop offset="1" stop-color="#ff2d46"/>
+</linearGradient>
+</defs>
+<g stroke="#14161f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+<path d="M400 196 L474 214 L492 256 L308 256 L326 214 z" fill="#ff2d46"/>
+<path d="M336 230 L464 230 L470 248 L330 248 z" fill="#c01326" stroke="none"/>
+<path d="M400 100 L450 118 L460 166 L442 194 L358 194 L340 166 L350 118 z" fill="#eef2ff"/>
+<path d="M400 100 L450 118 L455 142 L345 142 L350 118 z" fill="#17c4d2"/>
+<path d="M354 150 L446 150 L440 180 L360 180 z" fill="url(#gVisor-mid)"/>
+<path d="M366 158 L432 158 L428 166 L370 166 z" fill="#5f7bb8" stroke="none" opacity=".8"/>
+<path d="M232 262 L326 244 L334 348 L246 340 L220 302 z" fill="url(#gPod-mid)"/><path d="M244 292 L318 282 L320 302 L248 310 z" fill="#17c4d2" stroke="none"/>
+<g transform="translate(800 0) scale(-1 1)"><path d="M232 262 L326 244 L334 348 L246 340 L220 302 z" fill="url(#gPod-mid)"/><path d="M244 292 L318 282 L320 302 L248 310 z" fill="#17c4d2" stroke="none"/></g>
+<path d="M258 232 L286 236 L282 262 L262 258 z" fill="#0c0e16"/>
+<path d="M264 238 L280 241 L277 255 L267 253 z" fill="url(#gHeat-mid)" stroke="none"/>
+<path d="M514 232 L542 236 L538 262 L518 258 z" fill="#0c0e16"/>
+<path d="M520 238 L536 241 L533 255 L523 253 z" fill="url(#gHeat-mid)" stroke="none"/>
+<path d="M334 236 L466 236 L494 274 L510 352 L290 352 L306 274 z" fill="url(#gBody-mid)"/>
+<path d="M340 252 L460 252 L466 268 L334 268 z" fill="#333c54" stroke="none"/>
+<path d="M312 300 L488 300 L492 318 L308 318 z" fill="#17c4d2" stroke="none" opacity=".9"/>
+<path d="M344 268 L456 268 L462 292 L436 292 L430 282 L370 282 L364 292 L338 292 z" fill="#0d1018" stroke-width="6"/>
+<path d="M318 264 L352 268 L354 296 L320 292 z" fill="#1b2130" stroke-width="6"/>
+<path d="M315 274 L353 277 L353 284 L315 281 z" fill="#17c4d2" stroke="none"/>
+<path d="M482 264 L448 268 L446 296 L480 292 z" fill="#1b2130" stroke-width="6"/>
+<path d="M485 274 L447 277 L447 284 L485 281 z" fill="#17c4d2" stroke="none"/>
+</g>
+</svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470" class="kart-layer kart-front" aria-hidden="true">
+<defs>
+<linearGradient id="gBody-front" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#3d4661"/><stop offset="1" stop-color="#161a27"/>
+</linearGradient>
+<linearGradient id="gPod-front" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#333c54"/><stop offset="1" stop-color="#161a27"/>
+</linearGradient>
+<linearGradient id="gNose-front" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#242b3d"/><stop offset="1" stop-color="#0f121c"/>
+</linearGradient>
+<radialGradient id="gTyre-front" cx=".36" cy=".26" r=".92">
+  <stop offset="0" stop-color="#454c61"/><stop offset="1" stop-color="#101219"/>
+</radialGradient>
+<linearGradient id="gVisor-front" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#2b3552"/><stop offset="1" stop-color="#0a0d16"/>
+</linearGradient>
+<radialGradient id="gShadow-front" cx=".5" cy=".5" r=".5">
+  <stop offset="0" stop-color="#150c22" stop-opacity=".5"/>
+  <stop offset="1" stop-color="#150c22" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="gHeat-front" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#ffb020"/><stop offset="1" stop-color="#ff2d46"/>
+</linearGradient>
+</defs>
+<g stroke="#14161f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+<path d="M316 302 L484 302 L512 382 L288 382 z" fill="url(#gNose-front)"/>
+<path d="M330 320 L390 330 L384 352 L326 342 z" fill="#05070d"/>
+<path d="M470 320 L410 330 L416 352 L474 342 z" fill="#05070d"/>
+<path d="M336 326 L384 334 L381 342 L333 335 z" fill="#ffb020" stroke="none"/>
+<path d="M464 326 L416 334 L419 342 L467 335 z" fill="#ffb020" stroke="none"/>
+<path d="M368 356 L432 356 L436 378 L364 378 z" fill="#eef2ff"/>
+<text x="400" y="376" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="900" text-anchor="middle" fill="#14161f" stroke="none" letter-spacing="1">01</text>
+<ellipse cx="180" cy="340" rx="72" ry="82" fill="url(#gTyre-front)"/><ellipse cx="180" cy="340" rx="63" ry="73" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(180 340) scale(1 1.139)"><circle r="41" fill="#79849c"/><circle r="36" fill="#17c4d2"/><path d="M-2.9 -8.3 L-4.3 -33.0 L4.3 -33.0 L2.9 -8.3 z M7.0 -5.4 L30.1 -14.3 L32.8 -6.1 L8.8 0.2 z M7.3 5.0 L22.9 24.2 L15.9 29.3 L2.5 8.5 z M-2.5 8.5 L-15.9 29.3 L-22.9 24.2 L-7.3 5.0 z M-8.8 0.2 L-32.8 -6.1 L-30.1 -14.3 L-7.0 -5.4 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="8.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
+<ellipse cx="620" cy="340" rx="72" ry="82" fill="url(#gTyre-front)"/><ellipse cx="620" cy="340" rx="63" ry="73" fill="none" stroke="#2a3040" stroke-width="4"/><g transform="translate(620 340) scale(1 1.139)"><circle r="41" fill="#79849c"/><circle r="36" fill="#17c4d2"/><path d="M-2.9 -8.3 L-4.3 -33.0 L4.3 -33.0 L2.9 -8.3 z M7.0 -5.4 L30.1 -14.3 L32.8 -6.1 L8.8 0.2 z M7.3 5.0 L22.9 24.2 L15.9 29.3 L2.5 8.5 z M-2.5 8.5 L-15.9 29.3 L-22.9 24.2 L-7.3 5.0 z M-8.8 0.2 L-32.8 -6.1 L-30.1 -14.3 L-7.0 -5.4 z" fill="#ccd5ea" stroke="#14161f" stroke-width="4" stroke-linejoin="round"/><circle r="8.2" fill="#79849c" stroke="#14161f" stroke-width="4"/></g>
+<path d="M262 384 L538 384 L552 412 L248 412 z" fill="#242b3d"/>
+<path d="M262 384 L538 384 L536 394 L264 394 z" fill="#d244c0" stroke="none"/>
+<path d="M110 380 L154 386 L150 404 L106 398 z" fill="#ff2d46"/>
+<path d="M646 380 L690 386 L686 404 L642 398 z" fill="#ff2d46"/>
+</g>
+</svg>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1913,7 +1997,8 @@ const VIEWS = { home:"#view-home", booking:"#view-booking", miniapp:"#view-minia
 function show(view, push){
   Object.entries(VIEWS).forEach(([k,sel]) => { $(sel).hidden = (k !== view); });
   if (push !== false) location.hash = view === "home" ? "#/" : "#/" + view;
-  window.scrollTo({ top:0, behavior:"instant" in window ? "instant" : "auto" });
+  window.scrollTo(0, 0);
+  if (typeof drive === "function") drive();
   $("#mobnav").dataset.open = "false";
   $("#burger").setAttribute("aria-expanded","false");
 }
@@ -1991,6 +2076,23 @@ addEventListener("hashchange", route);
 addEventListener("scroll", () => {
   $("#topbar").classList.toggle("stuck", scrollY > 8);
 }, { passive:true });
+
+/* the kart drives at the camera as the hero scrolls past */
+const kartEl = $(".kart"), heroEl = $(".hero");
+let driveTick = 0;
+function drive(){
+  driveTick = 0;
+  if (!kartEl || !heroEl || $("#view-home").hidden) return;
+  const r = heroEl.getBoundingClientRect();
+  const p = Math.min(Math.max(-r.top / Math.max(r.height * 0.85, 1), 0), 1);
+  kartEl.style.setProperty("--drive", (p * p).toFixed(4));   // squared = accelerating
+}
+if (kartEl && !matchMedia("(prefers-reduced-motion: reduce)").matches){
+  const queueDrive = () => { if (!driveTick) driveTick = requestAnimationFrame(drive); };
+  addEventListener("scroll", queueDrive, { passive:true });
+  addEventListener("resize", queueDrive);
+  drive();
+}
 
 /* reveal on scroll — with a hard safety net so content can never stay invisible */
 const revealAll = () => $$(".rv").forEach(n => n.classList.add("in"));
