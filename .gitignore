@@ -1,0 +1,6 @@
+# build artefacts that are not needed on the server
+*.zip
+__pycache__/
+
+# dist/ IS committed on purpose: the server should only need `git pull`,
+# not a Python toolchain to rebuild the page.

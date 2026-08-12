@@ -1,0 +1,1914 @@
+<title>Ashxobod Sayilgohi</title>
+
+<style>
+/* ============================================================
+   Ashxobod Sayilgohi — prototype
+   Palette lifted from the park's own logo:
+   teal #12aebb · magenta #c53fb4 · purple #6d2e91 · amber #f8a824
+   ============================================================ */
+
+:root{
+  color-scheme: light;
+
+  --sky-0:#f4fbff;  --sky-1:#e2f4ff;  --sky-2:#c3e8fb;  --sky-3:#a5daf5;
+  --cloud:#ffffff;
+
+  --ink:#241a35;    --ink-2:#584a6f;  --ink-3:#8a7ba3;
+  --surface:#ffffff; --surface-2:#f7f3fc; --surface-3:#efe8f8;
+  --line:#e7dcf3;   --line-2:#d6c7ea;
+
+  --teal:#12aebb;   --teal-d:#0a8b96; --teal-l:#5fd7e0; --teal-soft:#dff7f9;
+  --magenta:#c53fb4;--magenta-d:#9c2d90; --magenta-soft:#fbe6f8;
+  --purple:#6d2e91; --amber:#f8a824;  --amber-d:#d9860a; --amber-soft:#fff3dc;
+  --pink:#ff4f9d;   --pink-d:#e0327f;
+
+  --carbon:#0b0d14; --carbon-2:#131826; --carbon-3:#1c2334;
+  --carbon-line:#2b3550; --carbon-ink:#e9edfb; --carbon-ink-2:#9aa6c8;
+  --kart-red:#ff2d46; --kart-amber:#ffc531;
+
+  --track-1:#4a3f63; --track-2:#7d6f9c;
+  --teal-text:#0a8b96; --accent-text:#9c2d90;
+
+  --shadow-s: 0 2px 8px -2px rgba(52,20,80,.14);
+  --shadow-m: 0 14px 34px -18px rgba(52,20,80,.40);
+  --shadow-l: 0 30px 70px -34px rgba(52,20,80,.52);
+
+  --r-s:12px; --r-m:18px; --r-l:26px; --r-xl:34px;
+  --pad: clamp(18px, 4vw, 48px);
+  --maxw: 1180px;
+
+  --font: ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", "Nunito",
+          system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* every bitmap lives here exactly once, so the inlined data URI is never duplicated */
+  --img-logo:  url("{{ASSET:logo.jpg}}");
+  --img-day:   url("{{ASSET:park-aerial-day.jpg}}");
+  --img-night: url("{{ASSET:park-night-wheel.jpg}}");
+  --img-dusk:  url("{{ASSET:park-aerial-dusk.jpg}}");
+  --img-pend:  url("{{ASSET:park-pendulum.jpg}}");
+}
+
+.blogo{ display:block; background:var(--img-logo) center/cover no-repeat; border-radius:50%; }
+.photo{ background:var(--i) center/cover no-repeat; }
+
+/* --- night park --- */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --sky-0:#0b0e20; --sky-1:#141a38; --sky-2:#1e2751; --sky-3:#2b3670;
+    --cloud:#2a3360;
+    --ink:#f3eeff; --ink-2:#c5b9de; --ink-3:#9184b0;
+    --surface:#181d34; --surface-2:#1f2542; --surface-3:#262d50;
+    --line:#2d3559; --line-2:#3b4570;
+    --teal-soft:#123742; --magenta-soft:#3a1740; --amber-soft:#3d2a10;
+    --track-1:#241f38; --track-2:#4a3f6b;
+    --teal-text:#4fd9e4; --accent-text:#ef8fe2;
+    --shadow-s: 0 2px 8px -2px rgba(0,0,0,.5);
+    --shadow-m: 0 14px 34px -18px rgba(0,0,0,.75);
+    --shadow-l: 0 30px 70px -34px rgba(0,0,0,.85);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --sky-0:#0b0e20; --sky-1:#141a38; --sky-2:#1e2751; --sky-3:#2b3670;
+  --cloud:#2a3360;
+  --ink:#f3eeff; --ink-2:#c5b9de; --ink-3:#9184b0;
+  --surface:#181d34; --surface-2:#1f2542; --surface-3:#262d50;
+  --line:#2d3559; --line-2:#3b4570;
+  --teal-soft:#123742; --magenta-soft:#3a1740; --amber-soft:#3d2a10;
+  --track-1:#241f38; --track-2:#4a3f6b;
+  --teal-text:#4fd9e4; --accent-text:#ef8fe2;
+  --shadow-s: 0 2px 8px -2px rgba(0,0,0,.5);
+  --shadow-m: 0 14px 34px -18px rgba(0,0,0,.75);
+  --shadow-l: 0 30px 70px -34px rgba(0,0,0,.85);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+/* author display rules (.btn, .view) otherwise out-weigh the UA [hidden] rule */
+[hidden]{ display:none !important; }
+
+body{
+  margin:0;
+  font-family:var(--font);
+  background:var(--sky-0);
+  color:var(--ink);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+h1,h2,h3,h4{ margin:0; line-height:1.1; letter-spacing:-.02em; font-weight:900; }
+p{ margin:0; }
+img{ max-width:100%; display:block; }
+a{ color:inherit; }
+button{ font:inherit; color:inherit; }
+
+:where(a,button,input,select,summary,[tabindex]):focus-visible{
+  outline:3px solid var(--magenta);
+  outline-offset:3px;
+  border-radius:6px;
+}
+
+.wrap{ width:100%; max-width:var(--maxw); margin-inline:auto; padding-inline:var(--pad); }
+.view[hidden]{ display:none !important; }
+.sr{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+     clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+
+.skip{
+  position:fixed; top:8px; left:8px; z-index:200; transform:translateY(-160%);
+  background:var(--magenta); color:#fff; padding:10px 16px; border-radius:999px;
+  text-decoration:none; font-weight:800; transition:transform .18s;
+}
+.skip:focus{ transform:none; }
+
+/* ---------------------------------------------------------- buttons */
+.btn{
+  --bg:var(--magenta); --fg:#fff;
+  display:inline-flex; align-items:center; justify-content:center; gap:.55em;
+  background:var(--bg); color:var(--fg);
+  border:0; border-radius:999px;
+  padding:.85em 1.6em;
+  font-weight:800; font-size:1rem; letter-spacing:-.01em;
+  text-decoration:none; cursor:pointer; white-space:nowrap;
+  box-shadow:0 10px 22px -12px color-mix(in srgb, var(--bg) 80%, #000);
+  transition:transform .16s cubic-bezier(.2,.8,.3,1), box-shadow .16s, filter .16s;
+}
+.btn:hover{ transform:translateY(-2px); filter:brightness(1.06);
+  box-shadow:0 16px 30px -14px color-mix(in srgb, var(--bg) 80%, #000); }
+.btn:active{ transform:translateY(0) scale(.98); }
+.btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none; filter:none; }
+.btn-pink{ --bg:var(--pink); }
+.btn-teal{ --bg:var(--teal); }
+.btn-amber{ --bg:var(--amber); --fg:#3a2400; }
+.btn-red{ --bg:var(--kart-red); }
+.btn-ghost{
+  --bg:color-mix(in srgb, var(--surface) 86%, transparent); --fg:var(--ink);
+  border:2px solid var(--line-2); box-shadow:var(--shadow-s);
+  backdrop-filter:blur(6px);
+}
+.btn-ghost:hover{ border-color:var(--magenta); color:var(--magenta); filter:none; }
+.btn-sm{ padding:.6em 1.1em; font-size:.9rem; }
+.btn-lg{ padding:1em 2em; font-size:1.06rem; }
+.btn-block{ width:100%; }
+
+/* ---------------------------------------------------------- topbar */
+.topbar{
+  position:sticky; top:0; z-index:100;
+  background:color-mix(in srgb, var(--sky-0) 82%, transparent);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid transparent;
+  transition:border-color .2s, background .2s;
+}
+.topbar.stuck{ border-bottom-color:var(--line); background:color-mix(in srgb, var(--sky-0) 94%, transparent); }
+.topbar-in{ display:flex; align-items:center; gap:clamp(10px,2vw,26px); min-height:74px; }
+
+.brand{ display:flex; align-items:center; gap:11px; text-decoration:none; flex:0 0 auto; cursor:pointer;
+        background:none; border:0; padding:0; }
+.brand .blogo{ width:46px; height:46px; flex:0 0 46px; box-shadow:var(--shadow-s); }
+.brand-txt{ display:flex; flex-direction:column; line-height:1; text-align:left; }
+.brand-txt b{ font-size:1.02rem; font-weight:900; letter-spacing:-.03em; color:var(--teal-text); }
+.brand-txt span{ font-size:.62rem; letter-spacing:.22em; color:var(--magenta); font-weight:800; }
+
+.nav{ display:flex; gap:2px; margin-inline:auto; }
+.nav a{
+  text-decoration:none; font-weight:700; font-size:.94rem; color:var(--ink-2);
+  padding:.5em .78em; border-radius:999px; transition:background .16s,color .16s;
+}
+.nav a:hover{ background:var(--surface-2); color:var(--ink); }
+
+.tools{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+
+.langs{ display:flex; background:var(--surface-2); border-radius:999px; padding:3px; border:1px solid var(--line); }
+.langs button{
+  border:0; background:none; cursor:pointer; font-weight:800; font-size:.8rem;
+  padding:.32em .68em; border-radius:999px; color:var(--ink-3); transition:.16s;
+}
+.langs button[aria-pressed="true"]{ background:var(--magenta); color:#fff; }
+
+.icon-btn{
+  width:40px; height:40px; display:grid; place-items:center; cursor:pointer;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:50%;
+  font-size:1.05rem; transition:.16s;
+}
+.icon-btn:hover{ background:var(--surface-3); }
+.burger{ display:none; }
+
+.mobnav{ display:none; }
+.mobnav[data-open="true"]{ display:block; border-top:1px solid var(--line); background:var(--surface); }
+.mobnav a{ display:block; padding:14px var(--pad); text-decoration:none; font-weight:800; border-bottom:1px solid var(--line); }
+
+@media (max-width:1000px){
+  .nav{ display:none; }
+  .burger{ display:grid; }
+  .topbar-in{ justify-content:space-between; }
+  .tools{ margin-left:auto; }
+  .tools .btn{ display:none; }
+}
+
+/* ---------------------------------------------------------- hero */
+.hero{
+  position:relative; isolation:isolate; overflow:hidden;
+  padding-block:clamp(28px,5vw,64px) 0;
+  background:linear-gradient(178deg, var(--sky-1) 0%, var(--sky-2) 46%, var(--sky-1) 100%);
+}
+.hero-clouds{ position:absolute; inset:0; z-index:-3; pointer-events:none; opacity:.9; }
+.hero-clouds i{
+  position:absolute; display:block; background:var(--cloud); border-radius:999px;
+  filter:blur(.4px); opacity:.75;
+  box-shadow:0 8px 24px -14px rgba(40,10,70,.35);
+}
+.hero-clouds i::before,.hero-clouds i::after{
+  content:""; position:absolute; background:inherit; border-radius:50%;
+}
+.hero-clouds i::before{ width:60%; height:170%; left:12%; top:-88%; }
+.hero-clouds i::after{ width:44%; height:135%; right:10%; top:-58%; }
+.c1{ width:190px; height:52px; left:4%;  top:12%;  animation:drift 34s linear infinite; }
+.c2{ width:130px; height:38px; left:72%; top:8%;   animation:drift 46s linear infinite reverse; }
+.c3{ width:230px; height:60px; left:44%; top:30%;  opacity:.5 !important; animation:drift 58s linear infinite; }
+.c4{ width:110px; height:32px; left:18%; top:44%;  opacity:.45 !important; animation:drift 40s linear infinite reverse; }
+@keyframes drift{ from{ transform:translateX(-6vw) } to{ transform:translateX(6vw) } }
+
+.hero-photo{
+  position:absolute; inset:auto 0 0 0; height:58%; z-index:-2;
+  background:var(--img-day) center 34%/cover no-repeat;
+  filter:saturate(1.5) contrast(1.05) brightness(1.04);
+  -webkit-mask-image:linear-gradient(to bottom, transparent, #000 46%, #000);
+          mask-image:linear-gradient(to bottom, transparent, #000 46%, #000);
+  opacity:.44;
+}
+/* keeps the headline readable where it sits over the aerial photo */
+.hero::after{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(102deg, color-mix(in srgb, var(--sky-1) 90%, transparent) 0 26%, transparent 62%);
+}
+:root[data-theme="dark"] .hero-photo{ opacity:.38; filter:saturate(1.3) brightness(.75); }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .hero-photo{ opacity:.38; filter:saturate(1.3) brightness(.75); }
+}
+
+.hero-grid{
+  display:grid; gap:clamp(20px,3vw,40px);
+  grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);
+  align-items:center;
+}
+@media (max-width:900px){ .hero-grid{ grid-template-columns:1fr; text-align:center; } }
+
+.eyebrow{
+  display:inline-flex; align-items:center; gap:.5em;
+  background:var(--surface); color:var(--accent-text);
+  border:1px solid var(--line);
+  padding:.42em 1em; border-radius:999px;
+  font-weight:800; font-size:.82rem; letter-spacing:.02em;
+  box-shadow:var(--shadow-s);
+}
+.eyebrow .dot{ width:8px; height:8px; border-radius:50%; background:var(--teal); }
+
+.hero h1{
+  margin-top:18px;
+  font-size:clamp(2.1rem, 5.4vw, 3.9rem);
+  letter-spacing:-.035em;
+}
+.hero h1 em{ font-style:normal; color:var(--magenta); }
+.hero h1 .accent{ color:var(--teal-text); }
+.hero-sub{
+  margin-top:16px; max-width:52ch; font-size:clamp(1rem,1.5vw,1.12rem);
+  color:var(--ink-2); font-weight:500;
+}
+@media (max-width:900px){ .hero-sub{ margin-inline:auto; } }
+.hero-cta{ display:flex; flex-wrap:wrap; gap:12px; margin-top:26px; }
+@media (max-width:900px){ .hero-cta{ justify-content:center; } }
+
+.stats{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px; margin-top:34px; padding-bottom:clamp(20px,4vw,44px);
+}
+@media (max-width:560px){ .stats{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.stat{
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  border:1px solid var(--line); border-radius:var(--r-m);
+  padding:12px 10px; text-align:center; box-shadow:var(--shadow-s);
+  backdrop-filter:blur(6px);
+}
+.stat b{ display:block; font-size:clamp(1.1rem,2.3vw,1.45rem); font-weight:900; color:var(--teal-text); letter-spacing:-.03em; }
+.stat span{ font-size:.76rem; color:var(--ink-3); font-weight:700; }
+
+/* kart stage */
+.stage{ position:relative; min-height:clamp(240px,34vw,400px); display:grid; place-items:end center; }
+.kart{ position:relative; z-index:2; width:min(100%,560px); filter:drop-shadow(0 26px 26px rgba(45,15,70,.28)); }
+.kart svg{ width:100%; height:auto; display:block; }
+.kart{ animation:rev 2.4s ease-in-out infinite; }
+@keyframes rev{
+  0%,100%{ transform:translateY(0) rotate(0deg) }
+  25%{ transform:translateY(-6px) rotate(-.5deg) }
+  75%{ transform:translateY(-3px) rotate(.5deg) }
+}
+#kartSpeed path{ animation:whoosh 1s linear infinite; }
+#kartSpeed path:nth-child(2),#kartSpeed path:nth-child(5){ animation-delay:-.33s }
+#kartSpeed path:nth-child(3),#kartSpeed path:nth-child(6){ animation-delay:-.66s }
+@keyframes whoosh{ 0%{opacity:0;transform:scaleX(.4)} 40%{opacity:.9} 100%{opacity:0;transform:scaleX(1.5)} }
+
+.track{
+  position:absolute; left:50%; bottom:-6px; width:min(1240px,180%); height:200px;
+  transform:translateX(-50%); z-index:1; pointer-events:none; overflow:hidden; opacity:.62;
+  -webkit-mask-image:radial-gradient(112% 108% at 50% 116%, #000 22%, rgba(0,0,0,.45) 52%, transparent 74%);
+          mask-image:radial-gradient(112% 108% at 50% 116%, #000 22%, rgba(0,0,0,.45) 52%, transparent 74%);
+}
+.track::before{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(to top, var(--track-1), var(--track-2));
+  clip-path:polygon(-10% 100%, 110% 100%, 57% 0%, 43% 0%);
+}
+/* track seams sliding toward the viewer — visible either side of the kart */
+.track::after{
+  content:""; position:absolute; inset:0;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,.65) 0 3px, transparent 3px 27px);
+  clip-path:polygon(-10% 100%, 110% 100%, 57% 0%, 43% 0%);
+  animation:runway 1.15s linear infinite;
+}
+@keyframes runway{ from{ background-position:0 0 } to{ background-position:0 27px } }
+
+/* ---------------------------------------------------------- marquee */
+.marquee{
+  background:linear-gradient(90deg,var(--teal),var(--magenta),var(--amber),var(--teal));
+  background-size:300% 100%; animation:huepan 18s linear infinite;
+  color:#fff; overflow:hidden; padding:11px 0; border-block:3px solid var(--ink);
+}
+@keyframes huepan{ to{ background-position:300% 0 } }
+.marquee-row{ display:flex; gap:0; width:max-content; animation:slide 26s linear infinite; }
+.marquee span{
+  padding-inline:26px; font-weight:900; font-size:.9rem; letter-spacing:.1em;
+  white-space:nowrap; text-transform:uppercase; display:flex; align-items:center; gap:26px;
+}
+.marquee span::after{ content:"✦"; opacity:.8; }
+@keyframes slide{ to{ transform:translateX(-50%) } }
+
+/* ---------------------------------------------------------- sections */
+.sec{ padding-block:clamp(52px,7vw,96px); }
+.sec-head{ max-width:760px; margin-bottom:clamp(26px,4vw,44px); }
+.sec-head.center{ margin-inline:auto; text-align:center; }
+.kicker{
+  font-size:.78rem; font-weight:900; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--magenta); display:block; margin-bottom:10px;
+}
+.sec h2{ font-size:clamp(1.7rem,3.6vw,2.7rem); }
+.sec-head p{ margin-top:14px; color:var(--ink-2); font-size:1.03rem; }
+
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-l);
+  box-shadow:var(--shadow-m);
+}
+
+/* --- tariffs --- */
+.tariffs{ display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); align-items:stretch; }
+.tariff{
+  position:relative; padding:28px 24px 26px; display:flex; flex-direction:column;
+  border-radius:var(--r-xl); overflow:hidden;
+  transition:transform .2s cubic-bezier(.2,.8,.3,1), box-shadow .2s;
+}
+.tariff:hover{ transform:translateY(-6px); box-shadow:var(--shadow-l); }
+.tariff::before{ content:""; position:absolute; inset:0 0 auto 0; height:7px; background:var(--tint); }
+.t-day{   --tint:var(--pink); }
+.t-full{  --tint:var(--teal); }
+.t-kart{  --tint:var(--amber); }
+.tariff.featured{ border-color:var(--tint); box-shadow:0 24px 60px -30px color-mix(in srgb,var(--tint) 70%,#000); }
+.tag{
+  position:absolute; top:18px; right:18px; background:var(--tint); color:#fff;
+  font-size:.68rem; font-weight:900; letter-spacing:.09em; text-transform:uppercase;
+  padding:.34em .8em; border-radius:999px;
+}
+.t-kart .tag{ color:#3a2400; }
+.tariff h3{ font-size:1.22rem; margin-top:6px; }
+.tariff .hours{ color:var(--ink-3); font-weight:700; font-size:.88rem; margin-top:4px; }
+.price{ display:flex; align-items:baseline; gap:.35em; margin-top:18px; }
+.price b{ font-variant-numeric:tabular-nums; font-size:clamp(2rem,4.4vw,2.7rem); font-weight:900; letter-spacing:-.045em; color:var(--tint); }
+.price i{ font-style:normal; font-weight:800; color:var(--ink-3); font-size:.92rem; }
+.feats{ list-style:none; margin:20px 0 24px; padding:0; display:grid; gap:9px; }
+.feats li{ display:flex; gap:9px; align-items:flex-start; font-size:.93rem; color:var(--ink-2); font-weight:600; }
+.feats li::before{
+  content:"✓"; flex:0 0 20px; height:20px; margin-top:2px; display:grid; place-items:center;
+  background:var(--tint); color:#fff; border-radius:50%; font-size:.7rem; font-weight:900;
+}
+.t-kart .feats li::before{ color:#3a2400; }
+.tariff .btn{ margin-top:auto; }
+.note{ margin-top:22px; font-size:.85rem; color:var(--ink-3); text-align:center; }
+
+/* --- karting dark zone --- */
+.kartzone{
+  position:relative; overflow:hidden; isolation:isolate;
+  background:var(--carbon); color:var(--carbon-ink);
+  padding-block:clamp(58px,8vw,110px);
+}
+.kartzone::before{
+  content:""; position:absolute; inset:0; z-index:-2; opacity:.5;
+  background-image:
+    linear-gradient(  60deg, transparent 47%, var(--carbon-line) 47% 49%, transparent 49%),
+    linear-gradient( -60deg, transparent 47%, var(--carbon-line) 47% 49%, transparent 49%),
+    linear-gradient(   0deg, transparent 47%, var(--carbon-line) 47% 49%, transparent 49%);
+  background-size:56px 96px;
+}
+.kartzone::after{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:
+    radial-gradient(90% 60% at 12% 0%,  rgba(255,45,70,.22), transparent 60%),
+    radial-gradient(80% 60% at 92% 30%, rgba(255,197,49,.18), transparent 62%),
+    radial-gradient(70% 70% at 50% 120%, rgba(197,63,180,.22), transparent 60%);
+}
+.kartzone .kicker{ color:var(--kart-amber); }
+.kartzone h2 em{ font-style:normal; color:var(--kart-red); }
+.kartzone .sec-head p{ color:var(--carbon-ink-2); }
+
+.kz-photo{
+  position:absolute; inset:0; z-index:-3; opacity:.16;
+  background:var(--img-pend) center/cover no-repeat;
+  filter:grayscale(.5) contrast(1.2);
+}
+
+.specs{ display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); margin-bottom:44px; }
+.spec{
+  background:color-mix(in srgb, var(--carbon-2) 88%, transparent);
+  border:1px solid var(--carbon-line); border-radius:var(--r-m);
+  padding:18px 18px 16px; backdrop-filter:blur(6px);
+}
+.spec b{ font-variant-numeric:tabular-nums; display:block; font-size:clamp(1.5rem,3vw,2.1rem); font-weight:900; letter-spacing:-.04em; color:var(--kart-amber); }
+.spec span{ font-size:.82rem; color:var(--carbon-ink-2); font-weight:700; }
+
+.karts{ display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); }
+.kartcard{
+  position:relative; background:linear-gradient(165deg,var(--carbon-3),var(--carbon-2));
+  border:1px solid var(--carbon-line); border-radius:var(--r-l);
+  padding:26px 24px; overflow:hidden;
+  transition:transform .2s cubic-bezier(.2,.8,.3,1), border-color .2s;
+}
+.kartcard:hover{ transform:translateY(-6px); border-color:var(--accent); }
+.kartcard::before{
+  content:""; position:absolute; top:-40%; right:-30%; width:220px; height:220px; border-radius:50%;
+  background:radial-gradient(circle, color-mix(in srgb,var(--accent) 45%, transparent), transparent 65%);
+}
+.k-klassik{ --accent:var(--kart-red); }
+.k-sport{   --accent:var(--kart-amber); }
+.k-twin{    --accent:var(--magenta); }
+.kartcard h3{ font-size:1.5rem; letter-spacing:.02em; color:var(--accent); }
+.kartcard .k-age{
+  display:inline-block; margin-top:8px; font-size:.76rem; font-weight:800; letter-spacing:.06em;
+  border:1px solid var(--carbon-line); border-radius:999px; padding:.28em .8em; color:var(--carbon-ink-2);
+}
+.k-rows{ margin:20px 0 22px; display:grid; gap:10px; }
+.k-row{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:rgba(255,255,255,.04); border:1px solid var(--carbon-line);
+  border-radius:var(--r-s); padding:11px 14px;
+}
+.k-row span{ font-weight:700; font-size:.9rem; color:var(--carbon-ink-2); }
+.k-row b{ font-variant-numeric:tabular-nums; font-weight:900; font-size:1.06rem; letter-spacing:-.02em; }
+.k-speed{ font-size:.84rem; color:var(--carbon-ink-2); font-weight:700; display:flex; align-items:center; gap:.4em; }
+
+/* --- attractions --- */
+.chips{ display:flex; flex-wrap:wrap; gap:9px; margin-bottom:28px; }
+.chip{
+  border:1px solid var(--line-2); background:var(--surface); color:var(--ink-2);
+  padding:.5em 1.05em; border-radius:999px; font-weight:800; font-size:.88rem; cursor:pointer;
+  transition:.16s;
+}
+.chip:hover{ border-color:var(--magenta); color:var(--magenta); }
+.chip[aria-pressed="true"]{ background:var(--magenta); border-color:var(--magenta); color:#fff; }
+.chip .n{ opacity:.65; font-weight:700; }
+
+.rides{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); }
+.ride{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-l);
+  padding:18px 16px 16px; text-align:center; box-shadow:var(--shadow-s);
+  transition:transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .18s, border-color .18s;
+}
+.ride:hover{ transform:translateY(-5px); box-shadow:var(--shadow-m); border-color:var(--tint); }
+.ride .orb{
+  width:66px; height:66px; margin:0 auto 12px; border-radius:50%;
+  display:grid; place-items:center; font-size:1.85rem;
+  background:radial-gradient(circle at 34% 28%, color-mix(in srgb,var(--tint) 32%, #fff), var(--tint));
+  box-shadow:0 10px 20px -10px var(--tint), inset 0 -4px 10px rgba(0,0,0,.14);
+}
+:root[data-theme="dark"] .ride .orb{ background:radial-gradient(circle at 34% 28%, color-mix(in srgb,var(--tint) 60%, #fff), var(--tint)); }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .ride .orb{ background:radial-gradient(circle at 34% 28%, color-mix(in srgb,var(--tint) 60%, #fff), var(--tint)); }
+}
+.ride h3{ font-size:.98rem; letter-spacing:-.02em; min-height:2.2em; display:flex; align-items:center; justify-content:center; }
+.ride .meta{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.pill{
+  font-size:.72rem; font-weight:900; padding:.3em .7em; border-radius:999px;
+  background:var(--surface-3); color:var(--ink-2);
+}
+.pill.price{ background:var(--tint); color:#fff; display:block; margin:0; }
+.r-kids{ --tint:var(--pink); }
+.r-family{ --tint:var(--teal); }
+.r-extreme{ --tint:var(--purple); }
+.r-karting{ --tint:var(--amber); }
+.r-karting .pill.price{ color:#3a2400; }
+.more-row{ display:flex; justify-content:center; margin-top:28px; }
+
+/* --- gallery --- */
+.gallery{ display:grid; gap:14px; grid-template-columns:repeat(4,1fr); grid-auto-rows:clamp(150px,16vw,205px); }
+.gallery figure{
+  margin:0; position:relative; overflow:hidden; border-radius:var(--r-l);
+  border:3px solid var(--surface); box-shadow:var(--shadow-m);
+}
+.gallery figure:nth-child(1){ grid-column:span 2; grid-row:span 2; }
+.gallery figure:nth-child(2){ grid-column:span 2; }
+.gallery .photo{
+  width:100%; height:100%;
+  filter:saturate(1.45) contrast(1.08) brightness(1.03);
+  transition:transform .5s cubic-bezier(.2,.8,.3,1), filter .35s;
+}
+.gallery figure:hover .photo{ transform:scale(1.07); filter:saturate(1.7) contrast(1.12); }
+.gallery figcaption{
+  position:absolute; inset:auto 0 0 0; padding:26px 16px 13px; color:#fff;
+  font-weight:800; font-size:.92rem;
+  background:linear-gradient(to top, rgba(20,6,36,.82), transparent);
+}
+@media (max-width:760px){
+  .gallery{ grid-template-columns:repeat(2,1fr); }
+  .gallery figure:nth-child(1){ grid-column:span 2; grid-row:span 1; }
+}
+
+/* --- cashback --- */
+.cashzone{ background:linear-gradient(160deg,var(--purple),var(--magenta-d) 55%,var(--magenta)); color:#fff; }
+.cashzone .kicker{ color:var(--amber); }
+.cashzone .sec-head p{ color:rgba(255,255,255,.82); }
+.cash{ display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+.cashcard{
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+  border-radius:var(--r-l); padding:24px 20px; text-align:center;
+  backdrop-filter:blur(8px); transition:transform .2s, background .2s;
+}
+.cashcard:hover{ transform:translateY(-6px); background:rgba(255,255,255,.16); }
+.cashcard .crown{ font-size:2rem; }
+.cashcard h3{ font-size:1rem; margin-top:8px; letter-spacing:0; }
+.cashcard .base{ font-variant-numeric:tabular-nums; margin-top:14px; font-size:1.3rem; font-weight:900; letter-spacing:-.03em; }
+.cashcard .bonus{
+  margin-top:8px; display:inline-block; background:var(--amber); color:#3a2400;
+  font-weight:900; font-size:1.05rem; padding:.28em .9em; border-radius:999px;
+}
+
+/* --- instagram --- */
+.ig{ display:grid; gap:26px; grid-template-columns:minmax(0,1fr) minmax(0,300px); align-items:center; }
+@media (max-width:800px){ .ig{ grid-template-columns:1fr; } }
+.reel{
+  position:relative; display:block; text-decoration:none; border-radius:var(--r-xl);
+  overflow:hidden; aspect-ratio:9/16; margin-inline:auto; width:min(100%,264px);
+  box-shadow:var(--shadow-l); border:3px solid var(--surface);
+}
+.reel .photo{ width:100%; height:100%; filter:saturate(1.4) brightness(.86); transition:.4s; }
+.reel:hover .photo{ transform:scale(1.06); }
+.reel .play{
+  position:absolute; inset:0; display:grid; place-items:center;
+}
+.reel .play span{
+  width:72px; height:72px; border-radius:50%; display:grid; place-items:center;
+  background:rgba(255,255,255,.94); color:var(--magenta); font-size:1.5rem; padding-left:5px;
+  box-shadow:0 12px 30px -10px rgba(0,0,0,.6); transition:transform .2s;
+}
+.reel:hover .play span{ transform:scale(1.1); }
+.reel .cap{
+  position:absolute; inset:auto 0 0 0; padding:34px 16px 14px; color:#fff; font-weight:800; font-size:.88rem;
+  background:linear-gradient(to top, rgba(20,6,36,.9), transparent);
+}
+.ig-links{ display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; }
+
+/* --- contact --- */
+.contact{ display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+.cbox{ padding:24px; border-radius:var(--r-l); background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow-s); }
+.cbox .ic{ font-size:1.6rem; }
+.cbox h3{ font-size:1.02rem; margin-top:10px; }
+.cbox p{ margin-top:6px; color:var(--ink-2); font-size:.94rem; font-weight:600; }
+.cbox a{ color:var(--magenta); font-weight:800; text-decoration:none; }
+.cbox a:hover{ text-decoration:underline; }
+.tbd{ font-size:.74rem; font-weight:800; color:var(--amber-d); background:var(--amber-soft);
+      padding:.16em .6em; border-radius:999px; display:inline-block; margin-left:.35em; }
+
+/* ---------------------------------------------------------- booking */
+.subhead{
+  background:var(--surface); border-bottom:1px solid var(--line);
+  padding-block:22px;
+}
+.subhead-in{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.subhead h1{ font-size:clamp(1.4rem,3vw,2rem); }
+.subhead p{ color:var(--ink-3); font-size:.9rem; font-weight:600; }
+
+.book{ display:grid; gap:24px; grid-template-columns:minmax(0,1fr) minmax(0,330px); align-items:start;
+       padding-block:clamp(24px,4vw,44px); }
+@media (max-width:940px){ .book{ grid-template-columns:minmax(0,1fr); } }
+
+.datestrip{ display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+.datestrip .arrow{ flex:0 0 auto; }
+.dates{ display:flex; gap:8px; overflow-x:auto; scroll-behavior:smooth; padding:4px 2px;
+        flex:1; min-width:0; scrollbar-width:thin; }
+.dates::-webkit-scrollbar{ height:6px; }
+.dates::-webkit-scrollbar-thumb{ background:var(--line-2); border-radius:999px; }
+.dcell{
+  flex:0 0 auto; min-width:64px; text-align:center; cursor:pointer;
+  background:var(--surface); border:2px solid var(--line); border-radius:var(--r-m);
+  padding:9px 8px; transition:.16s; line-height:1.25;
+}
+.dcell:hover{ border-color:var(--teal); }
+.dcell b{ display:block; font-size:1.16rem; font-weight:900; }
+.dcell span{ font-size:.68rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
+.dcell[aria-pressed="true"]{ background:var(--teal); border-color:var(--teal); color:#fff; }
+.dcell[aria-pressed="true"] span{ color:rgba(255,255,255,.85); }
+.dcell.weekend b{ color:var(--pink); }
+.dcell[aria-pressed="true"].weekend b{ color:#fff; }
+
+.tabs{ display:flex; gap:8px; margin-bottom:20px; border-bottom:2px solid var(--line); }
+.tab{
+  background:none; border:0; border-bottom:3px solid transparent; margin-bottom:-2px;
+  padding:.7em 1.1em; font-weight:800; color:var(--ink-3); cursor:pointer; transition:.16s;
+  display:flex; align-items:center; gap:.45em;
+}
+.tab:hover{ color:var(--ink); }
+.tab[aria-selected="true"]{ color:var(--magenta); border-bottom-color:var(--magenta); }
+
+.plist{ display:grid; gap:14px; }
+.prod{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-l);
+  padding:20px; display:grid; gap:18px; grid-template-columns:minmax(0,1fr) 320px;
+  align-items:start; box-shadow:var(--shadow-s);
+}
+@media (max-width:760px){ .prod{ grid-template-columns:1fr; } }
+.prod-info h3{ font-size:1.14rem; display:flex; align-items:center; gap:.5em; flex-wrap:wrap; }
+.badge{
+  font-size:.66rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase;
+  padding:.28em .7em; border-radius:999px; background:var(--tint,var(--teal)); color:#fff;
+}
+.p-klassik{ --tint:var(--kart-red); }
+.p-sport{ --tint:var(--amber-d); }
+.p-twin{ --tint:var(--magenta); }
+.p-day{ --tint:var(--pink); } .p-full{ --tint:var(--teal); } .p-kartb{ --tint:var(--amber-d); }
+.prod-info p{ margin-top:8px; color:var(--ink-2); font-size:.92rem; font-weight:600; }
+.prod-facts{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.fact{ font-size:.78rem; font-weight:800; color:var(--ink-2); background:var(--surface-2);
+       border:1px solid var(--line); border-radius:999px; padding:.3em .75em; }
+
+.prod-buy{ display:grid; gap:11px; grid-template-columns:1fr 1fr; align-content:start;
+           background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-m); padding:14px; }
+.prod-buy > .field-wide, .prod-buy > .sum, .prod-buy > .btn{ grid-column:1 / -1; }
+.field label{ display:block; font-size:.7rem; font-weight:900; letter-spacing:.09em;
+              text-transform:uppercase; color:var(--ink-3); margin-bottom:5px; }
+.seg{ display:flex; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:3px; }
+.seg button{
+  flex:1; border:0; background:none; cursor:pointer; font-weight:800; font-size:.84rem;
+  padding:.42em 0; border-radius:999px; color:var(--ink-3); transition:.16s;
+}
+.seg button[aria-pressed="true"]{ background:var(--teal); color:#fff; }
+.stepper{ display:flex; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:999px; }
+.stepper button{
+  width:34px; height:34px; border:0; background:none; cursor:pointer; font-size:1.15rem;
+  font-weight:900; color:var(--magenta); border-radius:50%;
+}
+.stepper button:disabled{ color:var(--ink-3); cursor:not-allowed; }
+.stepper output{ flex:1; text-align:center; font-weight:900; font-size:1rem; }
+select.sel{
+  width:100%; appearance:none; background:var(--surface); border:1px solid var(--line);
+  border-radius:999px; padding:.5em 2em .5em 1em; font-weight:800; font-size:.88rem; cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 17px) 52%, calc(100% - 12px) 52%;
+  background-size:5px 5px,5px 5px; background-repeat:no-repeat;
+}
+.sum{ display:flex; align-items:baseline; justify-content:space-between; padding-top:4px; }
+.sum span{ font-size:.78rem; font-weight:800; color:var(--ink-3); }
+.sum b{ font-variant-numeric:tabular-nums; font-size:1.28rem; font-weight:900; letter-spacing:-.03em; }
+
+/* cart */
+.cart{ position:sticky; top:92px; padding:22px; border-radius:var(--r-l);
+       background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow-m); }
+.cart h2{ font-size:1.12rem; display:flex; align-items:center; gap:.5em; }
+.cart-empty{ text-align:center; padding:26px 6px; color:var(--ink-3); }
+.cart-empty .ic{ font-size:2.2rem; }
+.cart-empty p{ margin-top:8px; font-size:.9rem; font-weight:600; }
+.citems{ list-style:none; margin:16px 0; padding:0; display:grid; gap:10px; max-height:44vh; overflow:auto; }
+.citem{ display:grid; grid-template-columns:1fr auto; gap:4px 10px;
+        border:1px solid var(--line); border-radius:var(--r-m); padding:11px 12px; background:var(--surface-2); }
+.citem b{ font-size:.92rem; }
+.citem .cmeta{ grid-column:1/-1; font-size:.76rem; color:var(--ink-3); font-weight:700; }
+.citem .cprice{ font-variant-numeric:tabular-nums; font-weight:900; font-size:.95rem; white-space:nowrap; }
+.citem .del{ grid-column:2; background:none; border:0; cursor:pointer; color:var(--ink-3); font-size:.9rem; padding:0; }
+.citem .del:hover{ color:var(--kart-red); }
+.ctotal{ display:flex; align-items:baseline; justify-content:space-between; padding-top:14px; border-top:2px dashed var(--line); }
+.ctotal span{ font-weight:800; color:var(--ink-3); font-size:.86rem; }
+.ctotal b{ font-variant-numeric:tabular-nums; font-size:1.5rem; font-weight:900; letter-spacing:-.04em; color:var(--magenta); }
+.cart .btn{ margin-top:16px; }
+.cart-note{ margin-top:12px; font-size:.76rem; color:var(--ink-3); text-align:center; }
+
+/* modal */
+.backdrop{
+  position:fixed; inset:0; z-index:300; background:rgba(24,8,44,.62);
+  backdrop-filter:blur(5px); display:grid; place-items:center; padding:20px;
+}
+.backdrop[hidden]{ display:none; }
+.modal{
+  background:var(--surface); border-radius:var(--r-xl); padding:34px 30px; max-width:420px; width:100%;
+  text-align:center; box-shadow:var(--shadow-l); border:1px solid var(--line);
+  animation:pop .28s cubic-bezier(.2,1.3,.4,1);
+}
+@keyframes pop{ from{ transform:scale(.9); opacity:0 } }
+.modal .ic{ font-size:3rem; }
+.modal h2{ font-size:1.4rem; margin-top:10px; }
+.modal p{ margin-top:10px; color:var(--ink-2); font-size:.95rem; font-weight:600; }
+.code{
+  margin:18px 0; padding:13px; border-radius:var(--r-m); background:var(--surface-2);
+  border:2px dashed var(--line-2); font-size:1.3rem; font-weight:900; letter-spacing:.14em; color:var(--teal-d);
+}
+
+/* ---------------------------------------------------------- mini app */
+.mini{ display:grid; gap:clamp(26px,4vw,48px); grid-template-columns:minmax(0,1fr) minmax(0,auto);
+       align-items:center; padding-block:clamp(30px,5vw,60px); }
+@media (max-width:940px){ .mini{ grid-template-columns:1fr; } }
+.mini-copy ul{ list-style:none; padding:0; margin:24px 0 0; display:grid; gap:14px; }
+.mini-copy li{ display:flex; gap:13px; align-items:flex-start; }
+.mini-copy li .n{
+  flex:0 0 30px; height:30px; border-radius:50%; display:grid; place-items:center;
+  background:var(--teal); color:#fff; font-weight:900; font-size:.86rem;
+}
+.mini-copy li b{ display:block; font-size:.98rem; }
+.mini-copy li p{ font-size:.9rem; color:var(--ink-2); font-weight:600; }
+
+.phones{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; }
+.phone{
+  width:280px; flex:0 0 auto; background:#0d1117; border-radius:38px; padding:10px;
+  box-shadow:var(--shadow-l), 0 0 0 2px rgba(255,255,255,.08) inset;
+  border:1px solid #2a3140;
+}
+.phone-screen{ background:var(--tg-bg); border-radius:29px; overflow:hidden; display:flex; flex-direction:column;
+               height:604px; --tg-bg:#ffffff; --tg-ink:#0f1419; --tg-hint:#707579; --tg-line:#e7e9ec;
+               --tg-blue:#2f9fe6; --tg-card:#f4f4f6; color:var(--tg-ink);
+               font-size:14px; line-height:1.45; }
+:root[data-theme="dark"] .phone-screen{ --tg-bg:#17212b; --tg-ink:#f0f2f5; --tg-hint:#8d9aa8;
+               --tg-line:#243342; --tg-card:#1f2c39; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .phone-screen{ --tg-bg:#17212b; --tg-ink:#f0f2f5; --tg-hint:#8d9aa8;
+               --tg-line:#243342; --tg-card:#1f2c39; }
+}
+.tg-bar{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid var(--tg-line); flex:0 0 auto; }
+.tg-bar .blogo{ width:28px; height:28px; flex:0 0 28px; }
+.tg-bar b{ font-size:.86rem; display:block; }
+.tg-bar small{ font-size:.68rem; color:var(--tg-hint); }
+.tg-bar .dots{ margin-left:auto; color:var(--tg-hint); letter-spacing:2px; }
+.tg-body{ flex:1; overflow:auto; padding:13px; display:grid; grid-template-columns:minmax(0,1fr);
+          gap:12px; align-content:start; }
+/* without this the scrolling chip rows size the grid column to their max-content
+   width and push the rows below them off the right edge of the phone */
+.tg-body > *{ min-width:0; }
+.tg-h{ font-size:1.02rem; font-weight:900; letter-spacing:-.02em; }
+.tg-lab{ font-size:.66rem; font-weight:900; letter-spacing:.09em; text-transform:uppercase; color:var(--tg-hint); margin-bottom:6px; }
+.tg-chips{ display:flex; gap:6px; overflow-x:auto; padding-bottom:3px; }
+.tg-chip{
+  flex:0 0 auto; border:1px solid var(--tg-line); background:var(--tg-card); color:var(--tg-ink);
+  border-radius:11px; padding:6px 10px; font-size:.74rem; font-weight:800; cursor:pointer; text-align:center; line-height:1.2;
+}
+.tg-chip[aria-pressed="true"]{ background:var(--tg-blue); border-color:var(--tg-blue); color:#fff; }
+.tg-chip small{ display:block; font-size:.62rem; opacity:.7; font-weight:700; }
+.tg-row{ display:flex; align-items:center; justify-content:space-between; gap:10px;
+         background:var(--tg-card); border-radius:12px; padding:10px 12px; }
+.tg-row span{ font-size:.8rem; font-weight:700; }
+.tg-step{ display:flex; align-items:center; gap:4px; }
+.tg-step button{ width:26px; height:26px; border:0; border-radius:50%; background:var(--tg-bg);
+                 border:1px solid var(--tg-line); cursor:pointer; font-weight:900; color:var(--tg-blue); }
+.tg-step output{ min-width:22px; text-align:center; font-weight:900; font-size:.86rem; }
+.tg-total{ display:flex; align-items:baseline; justify-content:space-between; padding-top:10px; border-top:1px solid var(--tg-line); }
+.tg-total span{ font-size:.76rem; color:var(--tg-hint); font-weight:700; }
+.tg-total b{ font-variant-numeric:tabular-nums; font-size:1.15rem; font-weight:900; letter-spacing:-.03em; }
+.tg-main{ flex:0 0 auto; margin:0; border:0; width:100%; background:var(--tg-blue); color:#fff;
+          padding:14px; font-weight:800; font-size:.9rem; cursor:pointer; }
+.tg-ticket{ border:1px solid var(--tg-line); border-radius:14px; overflow:hidden; }
+.tg-ticket .top{ padding:12px 14px; background:var(--tg-card); }
+.tg-ticket .top b{ font-size:.9rem; }
+.tg-ticket .top small{ display:block; color:var(--tg-hint); font-size:.72rem; font-weight:700; }
+.tg-ticket .qr{ padding:16px; display:grid; place-items:center; gap:8px; }
+.tg-ticket .qr small{ font-size:.68rem; color:var(--tg-hint); font-weight:800; letter-spacing:.14em; }
+.tg-ok{ display:inline-block; background:#e8f7ec; color:#1a7f37; font-size:.66rem; font-weight:900;
+        padding:.24em .6em; border-radius:999px; letter-spacing:.05em; }
+.phone-cap{ text-align:center; margin-top:12px; font-size:.82rem; font-weight:800; color:var(--ink-3); }
+
+/* ---------------------------------------------------------- footer */
+footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-block:44px 30px; margin-top:auto; }
+.foot{ display:grid; gap:26px; grid-template-columns:minmax(0,1.4fr) repeat(2,minmax(0,1fr)); }
+@media (max-width:760px){ .foot{ grid-template-columns:1fr 1fr; } .foot > div:first-child{ grid-column:1/-1; } }
+.foot h4{ font-size:.76rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:12px; }
+.foot ul{ list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+.foot a{ text-decoration:none; font-weight:700; font-size:.92rem; color:var(--ink-2); }
+.foot a:hover{ color:var(--magenta); }
+.foot p{ color:var(--ink-3); font-size:.88rem; font-weight:600; margin-top:12px; max-width:34ch; }
+.legal{ margin-top:32px; padding-top:18px; border-top:1px solid var(--line);
+        display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between;
+        font-size:.78rem; color:var(--ink-3); font-weight:700; }
+
+/* reveal */
+.rv{ opacity:0; transform:translateY(22px); transition:opacity .6s ease, transform .6s cubic-bezier(.2,.8,.3,1); }
+.rv.in{ opacity:1; transform:none; }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important;
+                        transition-duration:.001ms !important; scroll-behavior:auto !important; }
+  .rv{ opacity:1; transform:none; }
+}
+</style>
+
+
+<a class="skip" href="#main" data-i18n="a11y.skip">Asosiy qismga o'tish</a>
+
+<header class="topbar" id="topbar">
+  <div class="wrap topbar-in">
+    <button class="brand" data-go="home">
+      <span class="blogo" role="img" aria-label="Ashxobod Sayilgohi"></span>
+      <span class="brand-txt"><b>ASHXOBOD</b><span>SAYILGOHI</span></span>
+    </button>
+
+    <nav class="nav" aria-label="Primary">
+      <a href="#tariflar"      data-i18n="nav.tariffs"></a>
+      <a href="#karting"       data-i18n="nav.karting"></a>
+      <a href="#attraksionlar" data-i18n="nav.rides"></a>
+      <a href="#keshbek"       data-i18n="nav.cashback"></a>
+      <a href="#kontakt"       data-i18n="nav.contact"></a>
+      <a href="#/miniapp"      data-i18n="nav.miniapp"></a>
+    </nav>
+
+    <div class="tools">
+      <div class="langs" role="group" aria-label="Language">
+        <button type="button" data-lang="uz" aria-pressed="true">UZ</button>
+        <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+      </div>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Theme"><span id="themeIc">🌙</span></button>
+      <a class="btn btn-pink btn-sm" href="#/booking" data-i18n="cta.book"></a>
+      <button class="icon-btn burger" id="burger" type="button" aria-expanded="false" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <nav class="mobnav" id="mobnav" data-open="false" aria-label="Mobile">
+    <a href="#tariflar"      data-i18n="nav.tariffs"></a>
+    <a href="#karting"       data-i18n="nav.karting"></a>
+    <a href="#attraksionlar" data-i18n="nav.rides"></a>
+    <a href="#keshbek"       data-i18n="nav.cashback"></a>
+    <a href="#kontakt"       data-i18n="nav.contact"></a>
+    <a href="#/miniapp"      data-i18n="nav.miniapp"></a>
+    <a href="#/booking"      data-i18n="cta.book"></a>
+  </nav>
+</header>
+
+<main id="main">
+
+<!-- ══════════════════════════════════════════ HOME ══════════════════════════════════════════ -->
+<div class="view" id="view-home">
+
+  <section class="hero">
+    <div class="hero-photo" aria-hidden="true"></div>
+    <div class="hero-clouds" aria-hidden="true">
+      <i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>
+    </div>
+
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot"></span><span data-i18n="hero.eyebrow"></span></span>
+        <h1 data-i18n-html="hero.title"></h1>
+        <p class="hero-sub" data-i18n="hero.sub"></p>
+        <div class="hero-cta">
+          <a class="btn btn-pink btn-lg" href="#/booking" data-i18n="hero.cta1"></a>
+          <a class="btn btn-ghost btn-lg" href="#tariflar" data-i18n="hero.cta2"></a>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="track" aria-hidden="true"></div>
+        <div class="kart" role="img" data-i18n-aria="hero.kartAlt">{{SVG:kart.svg}}</div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <ul class="stats" style="list-style:none;padding-left:0;margin-left:0;margin-right:0">
+        <li class="stat"><b>34</b><span data-i18n="stat.rides"></span></li>
+        <li class="stat"><b>650 m</b><span data-i18n="stat.track"></span></li>
+        <li class="stat"><b>75</b><span data-i18n="stat.speed"></span></li>
+        <li class="stat"><b data-i18n="stat.freeVal"></b><span data-i18n="stat.free"></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="marquee-row" id="marquee"></div></div>
+
+  <!-- ─────────── tariffs ─────────── -->
+  <section class="sec" id="tariflar">
+    <div class="wrap">
+      <div class="sec-head center rv">
+        <span class="kicker" data-i18n="tar.kicker"></span>
+        <h2 data-i18n="tar.title"></h2>
+        <p data-i18n="tar.sub"></p>
+      </div>
+      <div class="tariffs rv" id="tariffs"></div>
+      <p class="note rv" data-i18n="tar.note"></p>
+    </div>
+  </section>
+
+  <!-- ─────────── karting (dark) ─────────── -->
+  <section class="sec kartzone" id="karting">
+    <div class="kz-photo" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="kicker">GOKART RACING</span>
+        <h2 data-i18n-html="kz.title"></h2>
+        <p data-i18n="kz.sub"></p>
+      </div>
+
+      <div class="specs rv" id="specs"></div>
+      <div class="karts rv" id="karts"></div>
+
+      <div style="margin-top:34px" class="rv">
+        <a class="btn btn-red btn-lg" href="#/booking" data-i18n="kz.cta"></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── attractions ─────────── -->
+  <section class="sec" id="attraksionlar">
+    <div class="wrap">
+      <div class="sec-head center rv">
+        <span class="kicker" data-i18n="rd.kicker"></span>
+        <h2 data-i18n="rd.title"></h2>
+        <p data-i18n="rd.sub"></p>
+      </div>
+      <div class="chips rv" id="rideChips" role="group" aria-label="filter"></div>
+      <div class="rides" id="rideGrid"></div>
+      <div class="more-row"><button class="btn btn-ghost" id="moreBtn" type="button"></button></div>
+    </div>
+  </section>
+
+  <!-- ─────────── gallery ─────────── -->
+  <section class="sec" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head center rv">
+        <span class="kicker" data-i18n="gal.kicker"></span>
+        <h2 data-i18n="gal.title"></h2>
+      </div>
+      <div class="gallery rv">
+        <figure>
+          <div class="photo" style="--i:var(--img-night)" aria-hidden="true"></div>
+          <figcaption data-i18n="gal.c1"></figcaption>
+        </figure>
+        <figure>
+          <div class="photo" style="--i:var(--img-dusk)" aria-hidden="true"></div>
+          <figcaption data-i18n="gal.c2"></figcaption>
+        </figure>
+        <figure>
+          <div class="photo" style="--i:var(--img-pend)" aria-hidden="true"></div>
+          <figcaption data-i18n="gal.c3"></figcaption>
+        </figure>
+        <figure>
+          <div class="photo" style="--i:var(--img-day)" aria-hidden="true"></div>
+          <figcaption data-i18n="gal.c4"></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── cashback ─────────── -->
+  <section class="sec cashzone" id="keshbek">
+    <div class="wrap">
+      <div class="sec-head center rv">
+        <span class="kicker" data-i18n="cb.kicker"></span>
+        <h2 data-i18n="cb.title"></h2>
+        <p data-i18n="cb.sub"></p>
+      </div>
+      <div class="cash rv" id="cash"></div>
+    </div>
+  </section>
+
+  <!-- ─────────── instagram ─────────── -->
+  <section class="sec">
+    <div class="wrap ig">
+      <div class="rv">
+        <span class="kicker" data-i18n="ig.kicker"></span>
+        <h2 data-i18n="ig.title"></h2>
+        <p style="margin-top:14px;color:var(--ink-2)" data-i18n="ig.sub"></p>
+        <div class="ig-links">
+          <a class="btn btn-teal" href="https://www.instagram.com/ashxobod_sayilgohi/" target="_blank" rel="noopener">Instagram</a>
+          <a class="btn btn-ghost" href="https://t.me/ashxobodsayilgohi" target="_blank" rel="noopener">Telegram</a>
+        </div>
+      </div>
+      <a class="reel rv" href="https://www.instagram.com/p/DbsvnbCiUS0/" target="_blank" rel="noopener">
+        <div class="photo" style="--i:var(--img-night)" aria-hidden="true"></div>
+        <span class="play"><span>▶</span></span>
+        <span class="cap" data-i18n="ig.reel"></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ─────────── contact ─────────── -->
+  <section class="sec" id="kontakt" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head center rv">
+        <span class="kicker" data-i18n="ct.kicker"></span>
+        <h2 data-i18n="ct.title"></h2>
+      </div>
+      <div class="contact rv">
+        <div class="cbox">
+          <div class="ic">📍</div>
+          <h3 data-i18n="ct.addr"></h3>
+          <p><span data-i18n="ct.addrVal"></span><span class="tbd" data-i18n="ct.tbd"></span></p>
+        </div>
+        <div class="cbox">
+          <div class="ic">🕚</div>
+          <h3 data-i18n="ct.hours"></h3>
+          <p data-i18n="ct.hoursVal"></p>
+        </div>
+        <div class="cbox">
+          <div class="ic">📞</div>
+          <h3 data-i18n="ct.phone"></h3>
+          <p><a href="tel:+998000000000">+998 (00) 000-00-00</a><span class="tbd" data-i18n="ct.tbd"></span></p>
+        </div>
+        <div class="cbox">
+          <div class="ic">💬</div>
+          <h3 data-i18n="ct.social"></h3>
+          <p>
+            <a href="https://t.me/ashxobodsayilgohi" target="_blank" rel="noopener">@ashxobodsayilgohi</a><br>
+            <a href="https://www.instagram.com/ashxobod_sayilgohi/" target="_blank" rel="noopener">@ashxobod_sayilgohi</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+
+<!-- ══════════════════════════════════════════ BOOKING ══════════════════════════════════════════ -->
+<div class="view" id="view-booking" hidden>
+  <div class="subhead">
+    <div class="wrap subhead-in">
+      <button class="icon-btn" data-go="home" aria-label="Back">←</button>
+      <div>
+        <h1 data-i18n="bk.title"></h1>
+        <p data-i18n="bk.sub"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap book">
+    <div>
+      <div class="datestrip">
+        <button class="icon-btn arrow" id="dPrev" type="button" aria-label="←">‹</button>
+        <div class="dates" id="dates" role="group" aria-label="date"></div>
+        <button class="icon-btn arrow" id="dNext" type="button" aria-label="→">›</button>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="karting" aria-selected="true">🏎️ <span data-i18n="bk.tabKart"></span></button>
+        <button class="tab" role="tab" data-tab="braslet" aria-selected="false">🎟️ <span data-i18n="bk.tabBand"></span></button>
+      </div>
+
+      <div class="plist" id="plist"></div>
+    </div>
+
+    <aside class="cart" aria-label="cart">
+      <h2 tabindex="-1">🛒 <span data-i18n="bk.cart"></span></h2>
+      <div id="cartBody"></div>
+    </aside>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════ MINI APP ══════════════════════════════════════════ -->
+<div class="view" id="view-miniapp" hidden>
+  <div class="subhead">
+    <div class="wrap subhead-in">
+      <button class="icon-btn" data-go="home" aria-label="Back">←</button>
+      <div>
+        <h1 data-i18n="ma.title"></h1>
+        <p data-i18n="ma.sub"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap mini">
+    <div class="mini-copy">
+      <span class="kicker" data-i18n="ma.kicker"></span>
+      <h2 data-i18n="ma.h2"></h2>
+      <p style="margin-top:14px;color:var(--ink-2)" data-i18n="ma.p"></p>
+      <ul>
+        <li><span class="n">1</span><div><b data-i18n="ma.s1t"></b><p data-i18n="ma.s1p"></p></div></li>
+        <li><span class="n">2</span><div><b data-i18n="ma.s2t"></b><p data-i18n="ma.s2p"></p></div></li>
+        <li><span class="n">3</span><div><b data-i18n="ma.s3t"></b><p data-i18n="ma.s3p"></p></div></li>
+        <li><span class="n">4</span><div><b data-i18n="ma.s4t"></b><p data-i18n="ma.s4p"></p></div></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="phones">
+        <div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="tg-bar">
+                <span class="blogo" aria-hidden="true"></span>
+                <div><b>Ashxobod Sayilgohi</b><small data-i18n="ma.miniapp"></small></div>
+                <span class="dots">⋯</span>
+              </div>
+              <div class="tg-body">
+                <div class="tg-h" data-i18n="ma.f1"></div>
+                <div>
+                  <div class="tg-lab" data-i18n="ma.lDate"></div>
+                  <div class="tg-chips" id="tgDates"></div>
+                </div>
+                <div>
+                  <div class="tg-lab" data-i18n="ma.lKart"></div>
+                  <div class="tg-chips" id="tgKarts"></div>
+                </div>
+                <div>
+                  <div class="tg-lab" data-i18n="ma.lTime"></div>
+                  <div class="tg-chips" id="tgTimes"></div>
+                </div>
+                <div class="tg-row">
+                  <span data-i18n="ma.people"></span>
+                  <div class="tg-step">
+                    <button type="button" id="tgMinus" aria-label="−">−</button>
+                    <output id="tgQty">2</output>
+                    <button type="button" id="tgPlus" aria-label="+">+</button>
+                  </div>
+                </div>
+                <div class="tg-total"><span data-i18n="ma.total"></span><b id="tgTotal"></b></div>
+              </div>
+              <button class="tg-main" id="tgMain" type="button"></button>
+            </div>
+          </div>
+          <p class="phone-cap" data-i18n="ma.cap1"></p>
+        </div>
+
+        <div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="tg-bar">
+                <span class="blogo" aria-hidden="true"></span>
+                <div><b data-i18n="ma.myBookings"></b><small data-i18n="ma.miniapp"></small></div>
+                <span class="dots">⋯</span>
+              </div>
+              <div class="tg-body">
+                <div class="tg-ticket">
+                  <div class="top">
+                    <span class="tg-ok" data-i18n="ma.confirmed"></span>
+                    <b style="margin-top:6px;display:block">GOKART · SPORT · 10 <span data-i18n="ma.min"></span></b>
+                    <small id="tkDate"></small>
+                  </div>
+                  <div class="qr">
+                    <svg viewBox="0 0 29 29" width="118" height="118" shape-rendering="crispEdges" role="img" aria-label="QR">
+                      <rect width="29" height="29" fill="#fff"/>
+                      <g fill="#0f1419" id="qrCells"></g>
+                    </svg>
+                    <small>ASH-4821-KT</small>
+                  </div>
+                </div>
+                <div class="tg-row"><span data-i18n="ma.people"></span><b>2</b></div>
+                <div class="tg-row"><span data-i18n="ma.paid"></span><b>270 000</b></div>
+                <div class="tg-h" style="font-size:.86rem" data-i18n="ma.tip"></div>
+              </div>
+              <button class="tg-main" type="button" data-i18n="ma.again"></button>
+            </div>
+          </div>
+          <p class="phone-cap" data-i18n="ma.cap2"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <button class="brand" data-go="home">
+          <span class="blogo" aria-hidden="true"></span>
+          <span class="brand-txt"><b>ASHXOBOD</b><span>SAYILGOHI</span></span>
+        </button>
+        <p data-i18n="ft.about"></p>
+      </div>
+      <div>
+        <h4 data-i18n="ft.park"></h4>
+        <ul>
+          <li><a href="#tariflar"      data-i18n="nav.tariffs"></a></li>
+          <li><a href="#attraksionlar" data-i18n="nav.rides"></a></li>
+          <li><a href="#karting"       data-i18n="nav.karting"></a></li>
+          <li><a href="#keshbek"       data-i18n="nav.cashback"></a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 data-i18n="ft.online"></h4>
+        <ul>
+          <li><a href="#/booking" data-i18n="cta.book"></a></li>
+          <li><a href="#/miniapp" data-i18n="nav.miniapp"></a></li>
+          <li><a href="https://t.me/ashxobodsayilgohi" target="_blank" rel="noopener">Telegram</a></li>
+          <li><a href="https://www.instagram.com/ashxobod_sayilgohi/" target="_blank" rel="noopener">Instagram</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <span>© 2026 Ashxobod Sayilgohi</span>
+      <span data-i18n="ft.proto"></span>
+    </div>
+  </div>
+</footer>
+
+<div class="backdrop" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="ic">🎉</div>
+    <h2 id="mTitle" data-i18n="md.title"></h2>
+    <p data-i18n="md.p"></p>
+    <div class="code" id="mCode">ASH-0000-KT</div>
+    <button class="btn btn-teal btn-block" id="mClose" type="button" data-i18n="md.close"></button>
+  </div>
+</div>
+
+
+<script>
+(function(){
+"use strict";
+
+/* ═══════════════════════════════ i18n ═══════════════════════════════ */
+const I18N = {
+uz:{
+ "a11y.skip":"Asosiy qismga o'tish",
+ "nav.tariffs":"Tariflar","nav.karting":"Karting","nav.rides":"Attraksionlar",
+ "nav.cashback":"Keshbek","nav.contact":"Kontakt","nav.miniapp":"Mini App",
+ "cta.book":"Bron qilish",
+
+ "hero.eyebrow":"Toshkent · Parkka kirish BEPUL",
+ "hero.title":"34 ta attraksion.<br>1 ta <em>karting</em> trassasi.<br><span class=\"accent\">Cheksiz emotsiya.</span>",
+ "hero.sub":"Ashxobod Sayilgohi — butun oila uchun istirohat bog'i. Parkka kirish bepul, barcha attraksionlar uchun esa bitta braslet yetarli.",
+ "hero.cta1":"Kartingni bron qilish","hero.cta2":"Tariflarni ko'rish",
+ "hero.kartAlt":"Trassadan chiqib kelayotgan kart",
+ "stat.rides":"attraksion","stat.track":"karting trassasi","stat.speed":"km/soat gacha",
+ "stat.free":"parkka kirish","stat.freeVal":"BEPUL",
+
+ "mq":["Parkka kirish BEPUL","34 ta attraksion","Karting 75 km/soat","650 metrlik trassa","Keshbek 500 000 gacha","Har kuni 11:00 — 22:00"],
+
+ "tar.kicker":"Tariflar",
+ "tar.title":"Bitta braslet — barcha attraksionlar",
+ "tar.sub":"Maxsus braslet orqali. Kassadan brasletni oling va kun bo'yi cheklovsiz uching.",
+ "tar.note":"Narxlar QQS hisobga olingan holda ko'rsatilgan. Bo'y va yosh chegaralari attraksionga qarab farq qiladi.",
+ "t.day.name":"Kunduzgi","t.day.f1":"Barcha attraksionlar cheklovsiz","t.day.f2":"Parkka kirish bepul","t.day.f3":"Ish kunlari va dam olish kunlari",
+ "t.full.name":"To'liq kun","t.full.f1":"Barcha attraksionlar cheklovsiz","t.full.f2":"Kechki yoritilgan park","t.full.f3":"Eng ommabop tanlov",
+ "t.kart.name":"Karting +","t.kart.f1":"Barcha attraksionlar cheklovsiz","t.kart.f2":"Karting — 5 daqiqa sovg'a","t.kart.f3":"Kun bo'yi 11:00 dan 22:00 gacha",
+ "tag.popular":"Ommabop","tag.best":"Eng foydali",
+ "tar.cta":"Tanlash",
+
+ "kz.title":"650 metr. 75 km/soat. <em>Tayyormisan?</em>",
+ "kz.sub":"Professional GOKART trassasi park ichida — 650 metr asfalt. Yakka va ikki kishilik kartlar, 12 yoshdan boshlab.",
+ "kz.cta":"Zaezdni bron qilish",
+ "sp.speed":"maksimal tezlik","sp.speedKids":"12–18 yosh uchun","sp.track":"trassa uzunligi","sp.twin":"ikki kishilik kart",
+ "sp.speedV":"75 km/soat","sp.speedKidsV":"65 km/soat","sp.trackV":"650 m","sp.twinV":"bor",
+ "k.klassik.age":"12 yoshdan","k.sport.age":"18 yoshdan","k.twin.age":"18 yoshdan",
+ "k.klassik.d":"Yosh haydovchilar uchun barqaror kart","k.sport.d":"Kattalar uchun tezkor sport kart","k.twin.d":"Ikki kishilik — kattalar bola bilan",
+ "k.min":"daqiqa","k.seat1":"1 o'rin","k.seat2":"2 o'rin",
+
+ "rd.kicker":"Attraksionlar",
+ "rd.title":"Parkda 34 ta attraksion",
+ "rd.sub":"Kichkintoylar uchun ham, ekstrimni yaxshi ko'radiganlar uchun ham. Braslet bilan barchasi cheklovsiz.",
+ "f.all":"Hammasi","f.kids":"Kichkintoylar","f.family":"Oilaviy","f.extreme":"Ekstremal","f.karting":"Karting",
+ "rd.more":"Barcha 34 ta attraksion","rd.less":"Yig'ish",
+ "rd.from":"so'm",
+ "unit.cm":"sm","unit.age":"yosh","unit.speed":"km/soat",
+
+ "gal.kicker":"Galereya","gal.title":"Park kunduzi va kechqurun",
+ "gal.c1":"Ulkan minora va charxpalak — kechki yoritish",
+ "gal.c2":"Quyosh botishida parkning umumiy ko'rinishi",
+ "gal.c3":"Mega tebrangich — parkning eng baland attraksioni",
+ "gal.c4":"Yashil hudud, fontanlar va oilaviy zona",
+
+ "cb.kicker":"Keshbek","cb.title":"To'ldiring va ko'proq oling",
+ "cb.sub":"Brasletni to'ldirganda bonus balansga avtomatik qo'shiladi.",
+ "cb.c1":"Sehrli keshbek","cb.c2":"Samoviy keshbek","cb.c3":"Afsonaviy keshbek","cb.c4":"Qirollik keshbeki",
+ "cb.bonus":"bonus",
+
+ "ig.kicker":"Instagram","ig.title":"Parkda har kuni nimalar bo'lyapti",
+ "ig.sub":"Yangi attraksionlar, aksiyalar va bayram dasturlari — rasmiy sahifalarimizda.",
+ "ig.reel":"Reel'ni Instagram'da ochish",
+
+ "ct.kicker":"Kontakt","ct.title":"Bizni qanday topasiz",
+ "ct.addr":"Manzil","ct.addrVal":"Toshkent shahri","ct.tbd":"aniqlanadi",
+ "ct.hours":"Ish vaqti","ct.hoursVal":"Har kuni 11:00 — 22:00",
+ "ct.phone":"Telefon","ct.social":"Ijtimoiy tarmoqlar",
+
+ "bk.title":"Onlayn bron qilish","bk.sub":"Sanani tanlang, keyin zaezd yoki brasletni savatga qo'shing",
+ "bk.tabKart":"Karting","bk.tabBand":"Braslet",
+ "bk.cart":"Savat","bk.empty":"Savat bo'sh","bk.emptyP":"Chapdagi ro'yxatdan tanlashni boshlang",
+ "bk.total":"Jami","bk.checkout":"Rasmiylashtirish","bk.note":"To'lov park kassasida yoki Telegram orqali",
+ "bk.dur":"Davomiyligi","bk.people":"Ishtirokchilar","bk.time":"Vaqt","bk.add":"Savatga qo'shish",
+ "bk.perPerson":"kishi boshiga","bk.del":"O'chirish",
+ "bk.today":"Bugun","bk.tomorrow":"Ertaga",
+ "wd":["Yak","Du","Se","Cho","Pay","Ju","Sha"],
+ "mo":["yan","fev","mar","apr","may","iyn","iyl","avg","sen","okt","noy","dek"],
+
+ "md.title":"Bron qabul qilindi!","md.p":"Bu prototip — haqiqiy to'lov amalga oshirilmadi. Tayyor tizimda bu yerda tasdiq va Telegram'ga eslatma keladi.",
+ "md.close":"Tushunarli",
+
+ "ma.title":"Telegram Mini App","ma.sub":"Xuddi shu bron, lekin Telegram ichida — saytsiz va ilovasiz",
+ "ma.kicker":"Telegram ichida","ma.h2":"Mijoz chatdan chiqmasdan bron qiladi",
+ "ma.p":"Mini App parkning Telegram kanaliga ulanadi. Foydalanuvchi tugmani bosadi, bron qiladi va QR-kod oladi — kassaga navbat kutmasdan keladi.",
+ "ma.s1t":"Kanaldagi tugma","ma.s1p":"«Bron qilish» tugmasi kanal ostida yoki menyuda turadi",
+ "ma.s2t":"3 ta qadamda bron","ma.s2p":"Sana → kart turi → vaqt. Narx real vaqtda hisoblanadi",
+ "ma.s3t":"QR-kod bilan chiplashtirish","ma.s3p":"Bron QR ko'rinishida keladi, administrator skanerlaydi",
+ "ma.s4t":"Xodimlar paneli","ma.s4p":"Zaezdlar jadvali, bandlik va kunlik hisobot avtomatik",
+ "ma.miniapp":"mini ilova","ma.f1":"Karting zaezdini bron qilish",
+ "ma.lDate":"Sana","ma.lKart":"Kart turi","ma.lTime":"Zaezd vaqti",
+ "ma.people":"Ishtirokchilar","ma.total":"Jami","ma.book":"Bron qilish",
+ "ma.myBookings":"Mening bronlarim","ma.confirmed":"TASDIQLANDI","ma.min":"daqiqa",
+ "ma.paid":"To'landi","ma.tip":"QR-kodni kassada ko'rsating — navbat kutish shart emas.",
+ "ma.again":"Yana bron qilish",
+ "ma.cap1":"Bron qilish oynasi","ma.cap2":"Bronlar va QR-chipta",
+
+ "ft.about":"Toshkentdagi oilaviy istirohat bog'i. Parkka kirish bepul, attraksionlar braslet orqali.",
+ "ft.park":"Park","ft.online":"Onlayn",
+ "ft.proto":"Prototip · dizayn namunasi"
+},
+ru:{
+ "a11y.skip":"Перейти к содержимому",
+ "nav.tariffs":"Тарифы","nav.karting":"Картинг","nav.rides":"Аттракционы",
+ "nav.cashback":"Кешбэк","nav.contact":"Контакты","nav.miniapp":"Mini App",
+ "cta.book":"Забронировать",
+
+ "hero.eyebrow":"Ташкент · Вход в парк БЕСПЛАТНЫЙ",
+ "hero.title":"34 аттракциона.<br>1 <em>картинг</em>-трасса.<br><span class=\"accent\">Бесконечные эмоции.</span>",
+ "hero.sub":"Ashxobod Sayilgohi — парк развлечений для всей семьи. Вход в парк бесплатный, а на все аттракционы достаточно одного браслета.",
+ "hero.cta1":"Забронировать картинг","hero.cta2":"Смотреть тарифы",
+ "hero.kartAlt":"Карт, выезжающий с трассы навстречу зрителю",
+ "stat.rides":"аттракциона","stat.track":"картинг-трасса","stat.speed":"км/ч до",
+ "stat.free":"вход в парк","stat.freeVal":"БЕСПЛАТНО",
+
+ "mq":["Вход в парк БЕСПЛАТНЫЙ","34 аттракциона","Картинг 75 км/ч","Трасса 650 метров","Кешбэк до 500 000","Ежедневно 11:00 — 22:00"],
+
+ "tar.kicker":"Тарифы",
+ "tar.title":"Один браслет — все аттракционы",
+ "tar.sub":"По специальному браслету. Получите его на кассе и катайтесь без ограничений.",
+ "tar.note":"Цены указаны с учётом НДС. Ограничения по росту и возрасту зависят от аттракциона.",
+ "t.day.name":"Дневной","t.day.f1":"Все аттракционы без ограничений","t.day.f2":"Вход в парк бесплатный","t.day.f3":"В будни и выходные",
+ "t.full.name":"Полный день","t.full.f1":"Все аттракционы без ограничений","t.full.f2":"Вечерний парк с подсветкой","t.full.f3":"Самый популярный выбор",
+ "t.kart.name":"Картинг +","t.kart.f1":"Все аттракционы без ограничений","t.kart.f2":"Картинг — 5 минут в подарок","t.kart.f3":"Весь день с 11:00 до 22:00",
+ "tag.popular":"Популярный","tag.best":"Выгоднее всего",
+ "tar.cta":"Выбрать",
+
+ "kz.title":"650 метров. 75 км/ч. <em>Готов?</em>",
+ "kz.sub":"Профессиональная трасса GOKART прямо в парке — 650 метров асфальта. Одноместные и двухместные карты, с 12 лет.",
+ "kz.cta":"Забронировать заезд",
+ "sp.speed":"максимальная скорость","sp.speedKids":"для 12–18 лет","sp.track":"длина трассы","sp.twin":"двухместный карт",
+ "sp.speedV":"75 км/ч","sp.speedKidsV":"65 км/ч","sp.trackV":"650 м","sp.twinV":"есть",
+ "k.klassik.age":"от 12 лет","k.sport.age":"от 18 лет","k.twin.age":"от 18 лет",
+ "k.klassik.d":"Стабильный карт для юных гонщиков","k.sport.d":"Быстрый спортивный карт для взрослых","k.twin.d":"Двухместный — взрослый с ребёнком",
+ "k.min":"минут","k.seat1":"1 место","k.seat2":"2 места",
+
+ "rd.kicker":"Аттракционы",
+ "rd.title":"34 аттракциона в парке",
+ "rd.sub":"И для малышей, и для любителей экстрима. По браслету — всё без ограничений.",
+ "f.all":"Все","f.kids":"Малышам","f.family":"Семейные","f.extreme":"Экстрим","f.karting":"Картинг",
+ "rd.more":"Все 34 аттракциона","rd.less":"Свернуть",
+ "rd.from":"сум",
+ "unit.cm":"см","unit.age":"лет","unit.speed":"км/ч",
+
+ "gal.kicker":"Галерея","gal.title":"Парк днём и вечером",
+ "gal.c1":"Большая башня и колесо обозрения — вечерняя подсветка",
+ "gal.c2":"Общий вид парка на закате",
+ "gal.c3":"Мега-качели — самый высокий аттракцион парка",
+ "gal.c4":"Зелёная зона, фонтаны и семейная площадка",
+
+ "cb.kicker":"Кешбэк","cb.title":"Пополняйте и получайте больше",
+ "cb.sub":"Бонус начисляется на баланс браслета автоматически при пополнении.",
+ "cb.c1":"Волшебный кешбэк","cb.c2":"Космический кешбэк","cb.c3":"Легендарный кешбэк","cb.c4":"Королевский кешбэк",
+ "cb.bonus":"бонус",
+
+ "ig.kicker":"Instagram","ig.title":"Что происходит в парке каждый день",
+ "ig.sub":"Новые аттракционы, акции и праздничные программы — на официальных страницах.",
+ "ig.reel":"Открыть Reel в Instagram",
+
+ "ct.kicker":"Контакты","ct.title":"Как нас найти",
+ "ct.addr":"Адрес","ct.addrVal":"г. Ташкент","ct.tbd":"уточнить",
+ "ct.hours":"Часы работы","ct.hoursVal":"Ежедневно 11:00 — 22:00",
+ "ct.phone":"Телефон","ct.social":"Соцсети",
+
+ "bk.title":"Онлайн-бронирование","bk.sub":"Выберите дату, затем добавьте заезд или браслет в корзину",
+ "bk.tabKart":"Картинг","bk.tabBand":"Браслет",
+ "bk.cart":"Корзина","bk.empty":"Корзина пуста","bk.emptyP":"Начните с выбора из списка слева",
+ "bk.total":"Итого","bk.checkout":"Оформить","bk.note":"Оплата на кассе парка или через Telegram",
+ "bk.dur":"Длительность","bk.people":"Участники","bk.time":"Время","bk.add":"В корзину",
+ "bk.perPerson":"с человека","bk.del":"Удалить",
+ "bk.today":"Сегодня","bk.tomorrow":"Завтра",
+ "wd":["Вс","Пн","Вт","Ср","Чт","Пт","Сб"],
+ "mo":["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"],
+
+ "md.title":"Бронь принята!","md.p":"Это прототип — реальная оплата не производилась. В готовой системе здесь будет подтверждение и напоминание в Telegram.",
+ "md.close":"Понятно",
+
+ "ma.title":"Telegram Mini App","ma.sub":"То же бронирование, но внутри Telegram — без сайта и без установки приложения",
+ "ma.kicker":"Внутри Telegram","ma.h2":"Клиент бронирует, не выходя из чата",
+ "ma.p":"Mini App подключается к Telegram-каналу парка. Пользователь нажимает кнопку, бронирует заезд и получает QR-код — приходит на кассу без очереди.",
+ "ma.s1t":"Кнопка в канале","ma.s1p":"«Забронировать» — под постом канала или в меню бота",
+ "ma.s2t":"Бронь в 3 шага","ma.s2p":"Дата → тип карта → время. Цена считается на лету",
+ "ma.s3t":"Электронный билет с QR","ma.s3p":"Бронь приходит в виде QR, администратор его сканирует",
+ "ma.s4t":"Панель сотрудников","ma.s4p":"Расписание заездов, загрузка и отчёт за день — автоматически",
+ "ma.miniapp":"мини-приложение","ma.f1":"Бронирование заезда на картинге",
+ "ma.lDate":"Дата","ma.lKart":"Тип карта","ma.lTime":"Время заезда",
+ "ma.people":"Участники","ma.total":"Итого","ma.book":"Забронировать",
+ "ma.myBookings":"Мои брони","ma.confirmed":"ПОДТВЕРЖДЕНО","ma.min":"минут",
+ "ma.paid":"Оплачено","ma.tip":"Покажите QR-код на кассе — очередь ждать не нужно.",
+ "ma.again":"Забронировать ещё",
+ "ma.cap1":"Экран бронирования","ma.cap2":"Брони и QR-билет",
+
+ "ft.about":"Семейный парк развлечений в Ташкенте. Вход в парк бесплатный, аттракционы — по браслету.",
+ "ft.park":"Парк","ft.online":"Онлайн",
+ "ft.proto":"Прототип · демонстрация дизайна"
+}};
+
+let lang = "uz";
+const t = k => (I18N[lang][k] !== undefined ? I18N[lang][k] : k);
+const money = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+const cur   = () => t("rd.from");
+/* r[3] holds "h110" (min height in cm) or "a6-12" (age range) */
+const fmtLimit = c => c.charAt(0) === "h"
+  ? c.slice(1) + " " + t("unit.cm")
+  : c.slice(1) + " " + t("unit.age");
+const speed = kmh => kmh + " " + t("unit.speed");
+
+/* ═══════════════════════════════ data ═══════════════════════════════ */
+const BANDS = [
+  { id:"day",  cls:"t-day",  price:50000, hours:"11:00 – 17:00", tag:null },
+  { id:"full", cls:"t-full", price:70000, hours:"11:00 – 22:00", tag:"popular" },
+  { id:"kart", cls:"t-kart", price:150000, hours:"11:00 – 22:00", tag:"best" }
+];
+
+const KARTS = [
+  { id:"klassik", label:"KLASSIK", cls:"k-klassik", pcls:"p-klassik", seats:1, speed:65, prices:{5:90000, 10:125000} },
+  { id:"sport",   label:"SPORT",   cls:"k-sport",   pcls:"p-sport",   seats:1, speed:75, prices:{5:95000, 10:135000} },
+  { id:"twin",    label:"TWIN",    cls:"k-twin",    pcls:"p-twin",    seats:2, speed:75, prices:{5:105000,10:155000} }
+];
+
+const CASHBACK = [
+  { k:"cb.c1", base:350000,  bonus:50000,  ic:"🎩" },
+  { k:"cb.c2", base:550000,  bonus:250000, ic:"🪐" },
+  { k:"cb.c3", base:750000,  bonus:350000, ic:"🛡️" },
+  { k:"cb.c4", base:1000000, bonus:500000, ic:"👑" }
+];
+
+/* name.uz / name.ru / emoji / age / price / category  — from the park's own price board */
+const RIDES = [
+ ["Koinotga sayohat","Космическое путешествие","🚀","h110",20000,"extreme"],
+ ["Vaqt mashinasi","Машина времени","⏳","h140",20000,"extreme"],
+ ["Samoviy sarguzashtlar","Небесные приключения","☁️","a6–12",10000,"family"],
+ ["Ulkan minora","Большая башня","🗼","h120",20000,"extreme"],
+ ["Dino","Дино","🦖","a9–16",24000,"extreme"],
+ ["Baliqchalar oroli","Остров рыбок","🐟","a8–16",10000,"family"],
+ ["Avtodrom 1","Автодром 1","🚗","h110",20000,"family"],
+ ["Quvnoq tepalik 1","Весёлая горка 1","🎢","a6–16",20000,"family"],
+ ["Quvnoq qurbaqa","Весёлая лягушка","🐸","a6–12",17000,"family"],
+ ["Bolalar ekskavatori","Детский экскаватор","🚜","a8–16",14000,"family"],
+ ["Disco","Диско","🪩","h120",34000,"extreme"],
+ ["G'aroyib sayohat","Удивительное путешествие","🧭","a6–16",24000,"family"],
+ ["Karting","Картинг","🏎️","h150",70000,"karting"],
+ ["Mega tebrangich","Мега-качели","🌀","h140",34000,"extreme"],
+ ["Qaroqchilar kemasi","Пиратский корабль","🏴‍☠️","h120",34000,"extreme"],
+ ["Quvnoq tepalik 2","Весёлая горка 2","🎢","a6–16",24000,"family"],
+ ["Super Arg'imchoq","Супер-качели","🎠","h120",34000,"extreme"],
+ ["Sarguzashtlar kemachasi","Кораблик приключений","⛵","a3–7",19000,"kids"],
+ ["Bolalar charxpalagi","Детское колесо","🎡","a3–7",14000,"kids"],
+ ["Quvnoq karusel","Весёлая карусель","🎠","a3–7",19000,"kids"],
+ ["Uchar qushlar","Летающие птички","🐦","a3–7",14000,"kids"],
+ ["Charxpalak","Колесо обозрения","🎡","a3+",30000,"family"],
+ ["Super poyga","Супер-гонки","🏁","a3–7",19000,"kids"],
+ ["Batut","Батут","🤸","a3–7",20000,"kids"],
+ ["Madagaskar","Мадагаскар","🦁","a3–7",24000,"kids"],
+ ["Shodon olmaxon","Весёлая белочка","🐿️","a3–7",14000,"kids"],
+ ["Avtodrom 2","Автодром 2","🚙","h110",20000,"family"],
+ ["Uchar tarvuzcha","Летающий арбузик","🍉","a4–10",10000,"kids"],
+ ["Super tebranish","Супер-качание","💫","a6–12",20000,"family"],
+ ["Bolalar kemachasi","Детский кораблик","🚤","a4–12",14000,"kids"],
+ ["Bugatti","Бугатти","🚘","a3–7",10000,"kids"],
+ ["Lolo va Pepe","Лоло и Пепе","🐧","a3–7",10000,"kids"],
+ ["Bolalar paravozchasi","Детский паровозик","🚂","a3–7",14000,"kids"],
+ ["Quvnoq poyezd","Весёлый поезд","🚆","a3–7",10000,"kids"]
+];
+
+const SLOTS = (() => { const a=[]; for(let h=11;h<22;h++){ a.push(h+":00"); a.push(h+":30"); } return a; })();
+
+/* ═══════════════════════════════ helpers ═══════════════════════════════ */
+const $  = (s, r) => (r||document).querySelector(s);
+const $$ = (s, r) => Array.from((r||document).querySelectorAll(s));
+const el = (tag, cls, html) => { const n=document.createElement(tag); if(cls) n.className=cls;
+                                 if(html!=null) n.innerHTML=html; return n; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function fmtDate(d){
+  return t("wd")[d.getDay()] + ", " + d.getDate() + " " + t("mo")[d.getMonth()];
+}
+
+/* ═══════════════════════════════ render: home ═══════════════════════════════ */
+function renderMarquee(){
+  const items = t("mq");
+  const row = $("#marquee"); row.innerHTML = "";
+  for (let i=0;i<2;i++) items.forEach(x => row.appendChild(el("span", null, esc(x))));
+}
+
+function renderTariffs(){
+  const box = $("#tariffs"); box.innerHTML = "";
+  BANDS.forEach(b => {
+    const c = el("article", "card tariff " + b.cls + (b.tag ? " featured" : ""));
+    c.innerHTML =
+      (b.tag ? '<span class="tag">'+esc(t("tag."+b.tag))+'</span>' : "") +
+      '<h3>'+esc(t("t."+b.id+".name"))+'</h3>' +
+      '<div class="hours">'+esc(b.hours)+'</div>' +
+      '<div class="price"><b>'+money(b.price)+'</b><i>'+esc(cur())+'</i></div>' +
+      '<ul class="feats">' +
+        '<li>'+esc(t("t."+b.id+".f1"))+'</li>' +
+        '<li>'+esc(t("t."+b.id+".f2"))+'</li>' +
+        '<li>'+esc(t("t."+b.id+".f3"))+'</li>' +
+      '</ul>' +
+      '<a class="btn btn-block" style="--bg:var(--tint)" href="#/booking">'+esc(t("tar.cta"))+'</a>';
+    box.appendChild(c);
+  });
+}
+
+function renderSpecs(){
+  const rows = [["sp.speedV","sp.speed"],["sp.speedKidsV","sp.speedKids"],["sp.trackV","sp.track"],["sp.twinV","sp.twin"]];
+  const box = $("#specs"); box.innerHTML = "";
+  rows.forEach(([v,k]) => box.appendChild(el("div","spec",'<b>'+esc(t(v))+'</b><span>'+esc(t(k))+'</span>')));
+}
+
+function renderKarts(){
+  const box = $("#karts"); box.innerHTML = "";
+  KARTS.forEach(k => {
+    const c = el("article","kartcard "+k.cls);
+    c.innerHTML =
+      '<h3>'+esc(k.label)+'</h3>' +
+      '<span class="k-age">'+esc(t("k."+k.id+".age"))+' · '+esc(t(k.seats===2?"k.seat2":"k.seat1"))+'</span>' +
+      '<div class="k-rows">' +
+        '<div class="k-row"><span>5 '+esc(t("k.min"))+'</span><b>'+money(k.prices[5])+'</b></div>' +
+        '<div class="k-row"><span>10 '+esc(t("k.min"))+'</span><b>'+money(k.prices[10])+'</b></div>' +
+      '</div>' +
+      '<div class="k-speed">⚡ '+esc(speed(k.speed))+'</div>';
+    box.appendChild(c);
+  });
+}
+
+function renderCash(){
+  const box = $("#cash"); box.innerHTML = "";
+  CASHBACK.forEach(c => box.appendChild(el("article","cashcard",
+    '<div class="crown">'+c.ic+'</div>' +
+    '<h3>'+esc(t(c.k))+'</h3>' +
+    '<div class="base">'+money(c.base)+'</div>' +
+    '<div class="bonus">+'+money(c.bonus)+'</div>')));
+}
+
+/* --- attractions --- */
+let rideFilter = "all", ridesExpanded = false;
+const FILTERS = [["all","f.all"],["kids","f.kids"],["family","f.family"],["extreme","f.extreme"],["karting","f.karting"]];
+
+function ridesOf(f){ return f==="all" ? RIDES : RIDES.filter(r => r[5]===f); }
+
+function renderChips(){
+  const box = $("#rideChips"); box.innerHTML = "";
+  FILTERS.forEach(([id,k]) => {
+    const b = el("button","chip",esc(t(k))+' <span class="n">'+ridesOf(id).length+'</span>');
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(id===rideFilter));
+    b.addEventListener("click", () => { rideFilter=id; ridesExpanded=false; renderChips(); renderRides(); });
+    box.appendChild(b);
+  });
+}
+
+function renderRides(){
+  const list = ridesOf(rideFilter);
+  const shown = ridesExpanded ? list : list.slice(0,15);
+  const grid = $("#rideGrid"); grid.innerHTML = "";
+  shown.forEach(r => {
+    const c = el("article","ride r-"+r[5]);
+    c.innerHTML =
+      '<div class="orb" aria-hidden="true">'+r[2]+'</div>' +
+      '<h3>'+esc(lang==="uz"?r[0]:r[1])+'</h3>' +
+      '<div class="meta"><span class="pill">'+esc(fmtLimit(r[3]))+'</span>' +
+      '<span class="pill price">'+money(r[4])+'</span></div>';
+    grid.appendChild(c);
+  });
+  const btn = $("#moreBtn");
+  btn.textContent = ridesExpanded ? t("rd.less") : t("rd.more");
+  btn.hidden = list.length <= 15;
+}
+
+/* ═══════════════════════════════ booking ═══════════════════════════════ */
+let selDate = new Date(); selDate.setHours(0,0,0,0);
+let dateStart = new Date(selDate);
+let bkTab = "karting";
+const cart = [];
+
+function renderDates(){
+  const box = $("#dates"); box.innerHTML = "";
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i=0;i<14;i++){
+    const d = new Date(dateStart); d.setDate(d.getDate()+i);
+    const wknd = d.getDay()===0 || d.getDay()===6;
+    const b = el("button","dcell"+(wknd?" weekend":""));
+    b.type = "button";
+    const same = d.getTime()===today.getTime();
+    const tmr  = d.getTime()===today.getTime()+864e5;
+    b.innerHTML = '<b>'+d.getDate()+'</b><span>'+ (same ? esc(t("bk.today")) : tmr ? esc(t("bk.tomorrow")) : esc(t("wd")[d.getDay()])) +'</span>';
+    b.setAttribute("aria-pressed", String(d.getTime()===selDate.getTime()));
+    b.setAttribute("aria-label", fmtDate(d));
+    b.addEventListener("click", () => { selDate = d; renderDates(); });
+    box.appendChild(b);
+  }
+}
+
+function prodCard(p){
+  const wrap = el("article","prod "+p.cls);
+  const state = { qty:1, dur:5, time:SLOTS[0] };
+
+  const info = el("div","prod-info");
+  info.innerHTML =
+    '<h3>'+esc(p.title)+' <span class="badge">'+esc(p.badge)+'</span></h3>' +
+    '<p>'+esc(p.desc)+'</p>' +
+    '<div class="prod-facts">'+p.facts.map(f=>'<span class="fact">'+esc(f)+'</span>').join("")+'</div>';
+
+  const buy = el("div","prod-buy");
+
+  let durHtml = "";
+  if (p.durations){
+    durHtml =
+      '<div class="field field-wide"><label>'+esc(t("bk.dur"))+'</label><div class="seg" data-role="dur">' +
+        p.durations.map(d => '<button type="button" data-d="'+d+'" aria-pressed="'+(d===5)+'">'+d+' '+esc(t("k.min"))+'</button>').join("") +
+      '</div></div>';
+  }
+
+  buy.innerHTML =
+    durHtml +
+    '<div class="field"><label>'+esc(t("bk.time"))+'</label>' +
+      '<select class="sel" data-role="time" aria-label="'+esc(t("bk.time"))+'">'+SLOTS.map(s=>'<option>'+s+'</option>').join("")+'</select></div>' +
+    '<div class="field"><label>'+esc(t("bk.people"))+'</label>' +
+      '<div class="stepper"><button type="button" data-role="minus" aria-label="−">−</button>' +
+      '<output data-role="qty" aria-label="'+esc(t("bk.people"))+'">1</output>' +
+      '<button type="button" data-role="plus" aria-label="+">+</button></div></div>' +
+    '<div class="sum"><span>'+esc(t("bk.perPerson"))+'</span><b data-role="sum"></b></div>' +
+    '<button class="btn btn-pink btn-block btn-sm" type="button" data-role="add">'+esc(t("bk.add"))+'</button>';
+
+  wrap.append(info, buy);
+
+  const price = () => p.price(state.dur);
+  const sumEl = $('[data-role="sum"]', buy);
+  const qtyEl = $('[data-role="qty"]', buy);
+  const minus = $('[data-role="minus"]', buy);
+
+  function sync(){
+    sumEl.textContent = money(price()) + " " + cur();
+    qtyEl.textContent = state.qty;
+    minus.disabled = state.qty <= 1;
+  }
+
+  $$('[data-role="dur"] button', buy).forEach(b => b.addEventListener("click", () => {
+    state.dur = Number(b.dataset.d);
+    $$('[data-role="dur"] button', buy).forEach(x => x.setAttribute("aria-pressed", String(x===b)));
+    sync();
+  }));
+  $('[data-role="time"]', buy).addEventListener("change", e => { state.time = e.target.value; });
+  minus.addEventListener("click", () => { if(state.qty>1){ state.qty--; sync(); } });
+  $('[data-role="plus"]', buy).addEventListener("click", () => { if(state.qty<10){ state.qty++; sync(); } });
+  $('[data-role="add"]', buy).addEventListener("click", () => {
+    cart.push({
+      id: p.id, kind: p.kind, dur: state.dur, qty: state.qty,
+      time: state.time, date: new Date(selDate), unit: price()
+    });
+    renderCart();
+    $("#cartBody").animate?.([{transform:"scale(1.02)"},{transform:"scale(1)"}], {duration:220});
+  });
+
+  sync();
+  return wrap;
+}
+
+function renderProducts(){
+  const box = $("#plist"); box.innerHTML = "";
+  if (bkTab === "karting"){
+    KARTS.forEach(k => box.appendChild(prodCard({
+      id:k.id, kind:"kart", cls:k.pcls, title:"GOKART "+k.label, badge:k.label,
+      desc:t("k."+k.id+".d"),
+      facts:[t("k."+k.id+".age"), t(k.seats===2?"k.seat2":"k.seat1"), speed(k.speed), "650 m"],
+      durations:[5,10], price:d => k.prices[d]
+    })));
+  } else {
+    BANDS.forEach(b => box.appendChild(prodCard({
+      id:b.id, kind:"band", cls:"p-"+(b.id==="kart"?"kartb":b.id),
+      title:t("t."+b.id+".name"), badge:t("bk.tabBand"),
+      desc:t("t."+b.id+".f1")+" · "+t("t."+b.id+".f2"),
+      facts:[b.hours, t("t."+b.id+".f3")],
+      durations:null, price:() => b.price
+    })));
+  }
+}
+
+function cartTitle(it){
+  if (it.kind === "kart"){
+    const k = KARTS.find(x => x.id === it.id);
+    return "GOKART " + k.label + " · " + it.dur + " " + t("k.min");
+  }
+  return t("t."+it.id+".name");
+}
+
+function renderCart(){
+  const body = $("#cartBody");
+  if (!cart.length){
+    body.innerHTML =
+      '<div class="cart-empty" tabindex="-1"><div class="ic">🛒</div><b>'+esc(t("bk.empty"))+'</b>' +
+      '<p>'+esc(t("bk.emptyP"))+'</p></div>';
+    return;
+  }
+  const total = cart.reduce((s,i) => s + i.unit*i.qty, 0);
+  body.innerHTML =
+    '<ul class="citems">' + cart.map((it,i) =>
+      '<li class="citem"><b>'+esc(cartTitle(it))+'</b>' +
+      '<span class="cprice">'+money(it.unit*it.qty)+'</span>' +
+      '<span class="cmeta">'+esc(fmtDate(it.date))+' · '+esc(it.time)+' · '+it.qty+'×</span>' +
+      '<button class="del" type="button" data-i="'+i+'" aria-label="'+esc(t("bk.del"))+'">✕ '+esc(t("bk.del"))+'</button></li>'
+    ).join("") + '</ul>' +
+    '<div class="ctotal"><span>'+esc(t("bk.total"))+'</span><b>'+money(total)+'</b></div>' +
+    '<button class="btn btn-pink btn-block" type="button" id="checkout">'+esc(t("bk.checkout"))+'</button>' +
+    '<p class="cart-note">'+esc(t("bk.note"))+'</p>';
+
+  $$(".del", body).forEach(b => b.addEventListener("click", () => {
+    cart.splice(Number(b.dataset.i), 1); renderCart();
+  }));
+  $("#checkout", body).addEventListener("click", openModal);
+}
+
+let lastFocus = null;
+function openModal(){
+  lastFocus = document.activeElement;
+  const code = "ASH-" + String(1000 + Math.floor(Math.random()*9000)) + "-KT";
+  $("#mCode").textContent = code;
+  const m = $("#modal");
+  m.hidden = false;
+  $("#mClose").focus();
+  cart.length = 0;
+  renderCart();
+}
+function closeModal(){
+  const m = $("#modal");
+  if (m.hidden) return;
+  m.hidden = true;
+  // checkout empties the cart, so the invoking button may no longer exist
+  const back = (lastFocus && lastFocus.isConnected) ? lastFocus : $("#cartBody");
+  if (back && back.focus) back.focus();
+  lastFocus = null;
+}
+
+/* ═══════════════════════════════ mini app ═══════════════════════════════ */
+const mini = { dateIdx:0, kart:"sport", dur:10, time:"18:00", qty:2 };
+
+function renderMini(){
+  const dates = $("#tgDates"); dates.innerHTML = "";
+  for (let i=0;i<5;i++){
+    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+i);
+    const b = el("button","tg-chip",'<span>'+d.getDate()+'</span><small>'+esc(t("wd")[d.getDay()])+'</small>');
+    b.type="button"; b.setAttribute("aria-pressed", String(i===mini.dateIdx));
+    b.addEventListener("click", () => { mini.dateIdx=i; renderMini(); });
+    dates.appendChild(b);
+  }
+
+  const karts = $("#tgKarts"); karts.innerHTML = "";
+  KARTS.forEach(k => [5,10].forEach(d => {
+    const b = el("button","tg-chip", esc(k.label)+'<small>'+d+' '+esc(t("k.min"))+'</small>');
+    b.type="button";
+    b.setAttribute("aria-pressed", String(k.id===mini.kart && d===mini.dur));
+    b.addEventListener("click", () => { mini.kart=k.id; mini.dur=d; renderMini(); });
+    karts.appendChild(b);
+  }));
+
+  const times = $("#tgTimes"); times.innerHTML = "";
+  ["17:00","17:30","18:00","18:30","19:00","19:30"].forEach(s => {
+    const b = el("button","tg-chip", s);
+    b.type="button"; b.setAttribute("aria-pressed", String(s===mini.time));
+    b.addEventListener("click", () => { mini.time=s; renderMini(); });
+    times.appendChild(b);
+  });
+
+  const k = KARTS.find(x => x.id===mini.kart);
+  const total = k.prices[mini.dur] * mini.qty;
+  $("#tgQty").textContent = mini.qty;
+  $("#tgMinus").disabled = mini.qty<=1;
+  $("#tgTotal").textContent = money(total) + " " + cur();
+  $("#tgMain").textContent = t("ma.book") + " · " + money(total) + " " + cur();
+
+  const d = new Date(); d.setDate(d.getDate()+1);
+  $("#tkDate").textContent = fmtDate(d) + " · 18:00";
+}
+
+function drawQR(){
+  /* decorative QR-like pattern — deterministic, not a real code */
+  const g = $("#qrCells"); if (!g) return;
+  let s = "", seed = 7;
+  const rnd = () => (seed = (seed*1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  for (let y=0;y<29;y++) for (let x=0;x<29;x++){
+    const finder = (x<7&&y<7)||(x>21&&y<7)||(x<7&&y>21);
+    const ring = finder && (x%7===0||y%7===0||x%7===6||y%7===6||(x%7>1&&x%7<5&&y%7>1&&y%7<5));
+    if (finder ? ring : rnd() > .55) s += '<rect x="'+x+'" y="'+y+'" width="1" height="1"/>';
+  }
+  g.innerHTML = s;
+}
+
+/* ═══════════════════════════════ routing ═══════════════════════════════ */
+const VIEWS = { home:"#view-home", booking:"#view-booking", miniapp:"#view-miniapp" };
+
+function show(view, push){
+  Object.entries(VIEWS).forEach(([k,sel]) => { $(sel).hidden = (k !== view); });
+  if (push !== false) location.hash = view === "home" ? "#/" : "#/" + view;
+  window.scrollTo({ top:0, behavior:"instant" in window ? "instant" : "auto" });
+  $("#mobnav").dataset.open = "false";
+  $("#burger").setAttribute("aria-expanded","false");
+}
+
+function route(){
+  const h = location.hash;
+  if (h.startsWith("#/booking"))      show("booking", false);
+  else if (h.startsWith("#/miniapp")) show("miniapp", false);
+  else if (h.startsWith("#/"))        show("home", false);
+  else if (h.length > 1){
+    // in-page anchor: make sure we're on home first, then scroll
+    if ($("#view-home").hidden) show("home", false);
+    const target = document.querySelector(h);
+    if (target) requestAnimationFrame(() => target.scrollIntoView({ behavior:"smooth", block:"start" }));
+  } else show("home", false);
+}
+
+/* ═══════════════════════════════ apply language ═══════════════════════════════ */
+function applyLang(){
+  document.documentElement.lang = lang;
+  $$("[data-i18n]").forEach(n => { n.textContent = t(n.dataset.i18n); });
+  $$("[data-i18n-html]").forEach(n => { n.innerHTML = t(n.dataset.i18nHtml); });
+  $$("[data-i18n-aria]").forEach(n => { n.setAttribute("aria-label", t(n.dataset.i18nAria)); });
+  $$("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang===lang)));
+
+  renderMarquee(); renderTariffs(); renderSpecs(); renderKarts(); renderCash();
+  renderChips(); renderRides();
+  renderDates(); renderProducts(); renderCart(); renderMini();
+}
+
+/* ═══════════════════════════════ wire up ═══════════════════════════════ */
+$$("[data-lang]").forEach(b => b.addEventListener("click", () => { lang = b.dataset.lang; applyLang(); }));
+
+$("#themeBtn").addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const dark = cur ? cur === "dark"
+                   : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+  $("#themeIc").textContent = dark ? "🌙" : "☀️";
+});
+
+$("#burger").addEventListener("click", () => {
+  const nav = $("#mobnav");
+  const open = nav.dataset.open === "true";
+  nav.dataset.open = String(!open);
+  $("#burger").setAttribute("aria-expanded", String(!open));
+});
+$$("#mobnav a").forEach(a => a.addEventListener("click", () => {
+  $("#mobnav").dataset.open = "false";
+  $("#burger").setAttribute("aria-expanded","false");
+}));
+
+$$("[data-go]").forEach(b => b.addEventListener("click", () => show(b.dataset.go)));
+
+$("#moreBtn").addEventListener("click", () => { ridesExpanded = !ridesExpanded; renderRides(); });
+
+$$(".tab").forEach(b => b.addEventListener("click", () => {
+  bkTab = b.dataset.tab;
+  $$(".tab").forEach(x => x.setAttribute("aria-selected", String(x===b)));
+  renderProducts();
+}));
+
+$("#dPrev").addEventListener("click", () => { $("#dates").scrollBy({ left:-260, behavior:"smooth" }); });
+$("#dNext").addEventListener("click", () => { $("#dates").scrollBy({ left: 260, behavior:"smooth" }); });
+
+$("#mClose").addEventListener("click", closeModal);
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+$("#tgPlus").addEventListener("click",  () => { if (mini.qty<8){ mini.qty++; renderMini(); } });
+$("#tgMinus").addEventListener("click", () => { if (mini.qty>1){ mini.qty--; renderMini(); } });
+$("#tgMain").addEventListener("click", openModal);
+
+addEventListener("hashchange", route);
+addEventListener("scroll", () => {
+  $("#topbar").classList.toggle("stuck", scrollY > 8);
+}, { passive:true });
+
+/* reveal on scroll — with a hard safety net so content can never stay invisible */
+const revealAll = () => $$(".rv").forEach(n => n.classList.add("in"));
+if ("IntersectionObserver" in window){
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+  }), { rootMargin:"0px 0px -8% 0px" });
+  $$(".rv").forEach(n => io.observe(n));
+  // anything already on screen at load reveals immediately, not on the next frame
+  requestAnimationFrame(() => $$(".rv").forEach(n => {
+    if (n.getBoundingClientRect().top < innerHeight) n.classList.add("in");
+  }));
+  setTimeout(revealAll, 4000);
+} else revealAll();
+
+drawQR();
+applyLang();
+route();
+})();
+</script>
