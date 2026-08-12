@@ -301,39 +301,14 @@ button{ font:inherit; color:inherit; }
 .stat span{ font-size:.76rem; color:var(--ink-3); font-weight:700; }
 
 /* kart stage */
-.stage{
-  position:relative; min-height:clamp(220px,30vw,360px); display:grid; place-items:end center;
-  perspective:1100px; perspective-origin:50% 40%;
-}
-/* --drive runs 0..1 as the hero scrolls past; the kart translates toward the camera
-   in real 3D, so the three layers separate and it stops reading as a flat sticker.
-   No filter on this element -- a filter would force transform-style back to flat. */
+.stage{ position:relative; min-height:clamp(220px,30vw,360px); display:grid; place-items:end center; }
+/* the kart is a real low-poly mesh drawn to this canvas — see src/kart3d.js.
+   It is sized in CSS only; the renderer handles the backing-store resolution. */
 .kart{
-  --drive:0;
-  position:relative; z-index:2; width:min(100%,560px); aspect-ratio:800/470;
-  transform-style:preserve-3d;
-  transform:
-    translate3d(calc(var(--drive) * 26px), calc(var(--drive) * 140px), calc(var(--drive) * 430px))
-    rotateX(calc(var(--drive) * -3deg));
+  position:relative; z-index:2; display:block;
+  width:min(126%,720px); aspect-ratio:17/10; margin-right:-11%;
 }
-.kart-rig{ position:absolute; inset:0; transform-style:preserve-3d;
-           animation:rev 2.6s ease-in-out infinite; }
-.kart-layer{ position:absolute; inset:0; width:100%; height:100%; display:block; }
-/* the scale cancels the enlargement each z offset would otherwise cause, so at rest
-   the kart looks exactly as drawn — the volume only appears once it moves.
-   factor = (perspective - z) / perspective, with perspective 1100px */
-.kart-back { transform:translateZ(-72px) scale(1.0655); }
-.kart-mid  { transform:translateZ(0); }
-.kart-front{ transform:translateZ(72px)  scale(0.9345); }
-
-#kartSpeed{ opacity:calc(.3 + var(--drive) * .7); }
-#kartSpeed path{ stroke-width:calc(9px + var(--drive) * 12px); }
-
-@keyframes rev{
-  0%,100%{ transform:translateY(0) rotate(0deg) }
-  25%{ transform:translateY(-5px) rotate(-.4deg) }
-  75%{ transform:translateY(-2px) rotate(.4deg) }
-}
+@media (max-width:900px){ .kart{ width:min(108%,560px); margin-right:0; } }
 #kartSpeed path{ animation:whoosh 1s linear infinite; }
 #kartSpeed path:nth-child(2),#kartSpeed path:nth-child(5){ animation-delay:-.33s }
 #kartSpeed path:nth-child(3),#kartSpeed path:nth-child(6){ animation-delay:-.66s }
@@ -878,13 +853,8 @@ footer{ background:var(--surface-2); border-top:1px solid var(--line); padding-b
       </div>
 
       <div class="stage">
-        <div class="kart" role="img" data-i18n-aria="hero.kartAlt">
-          <div class="kart-rig">
-            {{SVG:kart-back.svg}}
-            {{SVG:kart-mid.svg}}
-            {{SVG:kart-front.svg}}
-          </div>
-        </div>
+        <canvas class="kart" id="kart3d" width="1120" height="660"
+                role="img" data-i18n-aria="hero.kartAlt"></canvas>
       </div>
     </div>
 
@@ -1827,7 +1797,6 @@ function show(view, push){
   Object.entries(VIEWS).forEach(([k,sel]) => { $(sel).hidden = (k !== view); });
   if (push !== false) location.hash = view === "home" ? "#/" : "#/" + view;
   window.scrollTo(0, 0);
-  if (typeof drive === "function") drive();
   $("#mobnav").dataset.open = "false";
   $("#burger").setAttribute("aria-expanded","false");
 }
@@ -1906,23 +1875,6 @@ addEventListener("scroll", () => {
   $("#topbar").classList.toggle("stuck", scrollY > 8);
 }, { passive:true });
 
-/* the kart drives at the camera as the hero scrolls past */
-const kartEl = $(".kart"), heroEl = $(".hero");
-let driveTick = 0;
-function drive(){
-  driveTick = 0;
-  if (!kartEl || !heroEl || $("#view-home").hidden) return;
-  const r = heroEl.getBoundingClientRect();
-  const p = Math.min(Math.max(-r.top / Math.max(r.height * 0.85, 1), 0), 1);
-  kartEl.style.setProperty("--drive", (p * p).toFixed(4));   // squared = accelerating
-}
-if (kartEl && !matchMedia("(prefers-reduced-motion: reduce)").matches){
-  const queueDrive = () => { if (!driveTick) driveTick = requestAnimationFrame(drive); };
-  addEventListener("scroll", queueDrive, { passive:true });
-  addEventListener("resize", queueDrive);
-  drive();
-}
-
 /* reveal on scroll — with a hard safety net so content can never stay invisible */
 const revealAll = () => $$(".rv").forEach(n => n.classList.add("in"));
 if ("IntersectionObserver" in window){
@@ -1941,4 +1893,8 @@ drawQR();
 applyLang();
 route();
 })();
+</script>
+
+<script>
+{{JS:kart3d.js}}
 </script>

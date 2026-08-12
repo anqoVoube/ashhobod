@@ -14,7 +14,8 @@ Neither output makes a single external request.
 
 Tokens understood in the template:
     {{ASSET:name.jpg}}   -> data: URI for assets/name.jpg
-    {{SVG:kart.svg}}     -> the contents of src/kart.svg, inlined as markup
+    {{SVG:park.svg}}     -> the contents of src/park.svg, inlined as markup
+    {{JS:kart3d.js}}     -> the contents of src/kart3d.js, inlined as script body
 """
 import base64
 import mimetypes
@@ -87,10 +88,18 @@ def inline_svg(name: str) -> str:
     return svg.strip()
 
 
+def inline_js(name: str) -> str:
+    path = ROOT / "src" / name
+    if not path.exists():
+        sys.exit(f"missing js: {path}")
+    return path.read_text(encoding="utf-8").strip()
+
+
 def main() -> None:
     html = TEMPLATE.read_text(encoding="utf-8")
     html = re.sub(r"\{\{ASSET:([^}]+)\}\}", lambda m: data_uri(m.group(1)), html)
     html = re.sub(r"\{\{SVG:([^}]+)\}\}", lambda m: inline_svg(m.group(1)), html)
+    html = re.sub(r"\{\{JS:([^}]+)\}\}", lambda m: inline_js(m.group(1)), html)
 
     leftover = re.findall(r"\{\{[^}]+\}\}", html)
     if leftover:

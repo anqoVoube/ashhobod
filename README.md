@@ -35,9 +35,8 @@ responsive down to 360px, keyboard accessible, `prefers-reduced-motion` respecte
 index.html               ← the deliverable. Self-contained, ~580 KB, open it directly
 build.py                 ← regenerates index.html from src/ + assets/
 src/index.template.html  ← EDIT THIS, not index.html
-src/kart-{back,mid,front}.svg  ← hero kart, three depth layers (python3 src/make_kart.py)
+src/kart3d.js            ← hero kart: low-poly 3D mesh + software renderer
 src/park.svg             ← hero park skyline  (generated: python3 src/make_park.py)
-src/make_kart.py         ← tweak the kart here, then rerun it + build.py
 src/make_park.py         ← tweak the skyline here, then rerun it + build.py
 assets/                  ← logo + 4 park photos, resized and recompressed
 ```
@@ -106,18 +105,23 @@ stays exact and is cheap to re-tune.
 pastel; the kart is dark carbon, angular, on fat slicks, with the brand colours as racing accents.
 That contrast is what makes it read as the product rather than as decoration.
 
-**It is drawn flat but staged in 3D.** `.stage` carries a 1100px perspective and the kart is split
-into three SVGs — rear wing and rear wheels, driver and chassis, nose and front wheels — stacked at
-`translateZ` −72 / 0 / +72. Each layer is scale-compensated by `(1100 − z) / 1100`, so at rest the
-kart looks exactly as drawn. Scrolling drives it 430px toward the camera; the nearer layers then
-enlarge faster than the far ones and the shape gains real volume, without a WebGL runtime or a
-single external byte. The scroll handler is rAF-throttled, skips work while the hero is off-route,
-and never attaches under `prefers-reduced-motion`.
+**The kart is genuinely 3D.** `src/kart3d.js` holds a low-poly mesh — floor pan, nose, pods, seat,
+driver, wing, four wheels — and a hand-written renderer: perspective projection, back-face culling
+by screen-space winding, painter's-algorithm depth sort, flat lambert shading. About 300 quads,
+drawn to a 2D canvas.
 
-Two constraints worth remembering if you edit this: never put a `filter` on `.kart` (it forces
-`transform-style` back to `flat` and the layers collapse into a sticker), and keep the gradient ids
-suffixed per layer — all three SVGs share one document, so duplicate ids silently resolve to
-whichever parsed first.
+No WebGL and no library, deliberately. Three.js would be roughly the weight of this entire page and
+would have to be fetched or inlined; the whole point of the build is that the deliverable is one
+file with zero external requests. A software renderer at this polygon count costs nothing.
+
+Scrolling dollies the camera from 5.8 to 4.2 units out, which grows the kart from ~70% to ~92% of
+the canvas width. Those numbers were measured, not guessed — apparent size grows much faster than
+`1/distance` once the near wheels approach the lens, and earlier values had the camera ending up
+inside the bodywork. The wheels spin, the fronts steer slightly, and the body leans into it.
+
+The render loop only runs while the hero is on screen (IntersectionObserver), is driven by
+`requestAnimationFrame`, and under `prefers-reduced-motion` never starts — it paints one static
+frame and updates only on scroll.
 
 **Typography is a deliberate system stack**, not a webfont. The page has to render Uzbek Latin
 (`o'`, `g'`) and Russian Cyrillic side by side, and a display face missing Cyrillic would silently
