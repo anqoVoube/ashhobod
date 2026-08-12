@@ -121,7 +121,23 @@ inside the bodywork. The wheels spin, the fronts steer slightly, and the body le
 
 The render loop only runs while the hero is on screen (IntersectionObserver), is driven by
 `requestAnimationFrame`, and under `prefers-reduced-motion` never starts — it paints one static
-frame and updates only on scroll.
+frame and updates only on scroll. Wheel speed is scaled by elapsed time, not by frame count, so it
+does not double on a 120Hz display.
+
+Three things about this renderer are easy to break again:
+
+- **Winding.** Back faces are culled by the sign of the screen-space signed area, so a primitive
+  wound the wrong way is drawn exactly when it should be hidden. `frustum()` shipped mirrored once
+  and the driver and seat rendered inside-out — you saw their back faces and could not tell anyone
+  was sitting in the kart. Every helper winds counter-clockwise seen from outside; if you add one,
+  check it against `box()`.
+- **Normal orientation.** Point the face normal at the camera using the real view vector, never by
+  testing `nz < 0`. A horizontal face has `nz = ±sin(lean)`, which crosses zero twice per lean
+  cycle — that version made the entire upper surface of the kart strobe between lit and ambient
+  about every 1.6 seconds.
+- **Zero-size first paint.** A reload on `#/booking` routes before this script runs, so the canvas
+  measures 0×0 and paints nothing. A `ResizeObserver` on the canvas repaints as soon as it has a
+  size; without it, reduced-motion users returning to the home route get an empty hero.
 
 **Typography is a deliberate system stack**, not a webfont. The page has to render Uzbek Latin
 (`o'`, `g'`) and Russian Cyrillic side by side, and a display face missing Cyrillic would silently
